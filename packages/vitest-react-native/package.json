@@ -7,14 +7,18 @@
   "types": "./dist/plugin.d.ts",
   "exports": {
     ".": {
-      "import": "./dist/plugin.js",
-      "types": "./dist/plugin.d.ts"
+      "types": "./dist/plugin.d.ts",
+      "import": "./dist/plugin.js"
     },
     "./setup": {
-      "import": "./dist/setup.js",
-      "types": "./dist/setup.d.ts"
+      "types": "./dist/setup.d.ts",
+      "import": "./dist/setup.js"
     }
   },
+  "engines": {
+    "node": ">=18"
+  },
+  "sideEffects": false,
   "scripts": {
     "build": "tsc",
     "dev": "tsc --watch",
