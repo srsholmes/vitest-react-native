@@ -1,0 +1,70 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`SectionList Component > matches snapshot 1`] = `
+<View
+  ref={null}
+>
+  <SectionList>
+    <Text
+      ref={null}
+    >
+      Main dishes
+    </Text>
+    <Text
+      ref={null}
+    >
+      Pizza
+    </Text>
+    <Text
+      ref={null}
+    >
+      Burger
+    </Text>
+    <Text
+      ref={null}
+    >
+      Risotto
+    </Text>
+    <Text
+      ref={null}
+    >
+      Sides
+    </Text>
+    <Text
+      ref={null}
+    >
+      French Fries
+    </Text>
+    <Text
+      ref={null}
+    >
+      Onion Rings
+    </Text>
+    <Text
+      ref={null}
+    >
+      Fried Shrimps
+    </Text>
+    <Text
+      ref={null}
+    >
+      Drinks
+    </Text>
+    <Text
+      ref={null}
+    >
+      Water
+    </Text>
+    <Text
+      ref={null}
+    >
+      Coke
+    </Text>
+    <Text
+      ref={null}
+    >
+      Beer
+    </Text>
+  </SectionList>
+</View>
+`;

@@ -1,0 +1,28 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`Pressable Component > matches snapshot 1`] = `
+<View
+  ref={null}
+>
+  <Pressable
+    ref={null}
+    style={
+      {
+        "backgroundColor": "blue",
+        "padding": 10,
+      }
+    }
+  >
+    <Text
+      ref={null}
+      style={
+        {
+          "color": "white",
+        }
+      }
+    >
+      Press Me
+    </Text>
+  </Pressable>
+</View>
+`;

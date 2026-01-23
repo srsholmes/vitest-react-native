@@ -1,0 +1,20 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`Animated > matches snapshot 1`] = `
+<View
+  ref={null}
+  style={
+    {
+      "opacity": AnimatedValue {
+        "_value": 1,
+      },
+    }
+  }
+>
+  <Text
+    ref={null}
+  >
+    Animated Content
+  </Text>
+</View>
+`;

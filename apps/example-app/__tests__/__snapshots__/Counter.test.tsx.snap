@@ -1,0 +1,139 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`Counter > matches snapshot 1`] = `
+<View
+  ref={null}
+  style={
+    {
+      "alignItems": "center",
+      "flexDirection": "row",
+      "gap": 16,
+      "justifyContent": "center",
+    }
+  }
+  testID="counter"
+>
+  <Pressable
+    accessibilityLabel="Decrement"
+    accessibilityRole="button"
+    disabled={false}
+    onPress={[Function]}
+    ref={null}
+    style={
+      [
+        {
+          "alignItems": "center",
+          "backgroundColor": "#007AFF",
+          "borderRadius": 24,
+          "height": 48,
+          "justifyContent": "center",
+          "width": 48,
+        },
+        false,
+      ]
+    }
+    testID="counter-decrement"
+  >
+    <Text
+      ref={null}
+      style={
+        {
+          "color": "#FFFFFF",
+          "fontSize": 24,
+          "fontWeight": "bold",
+        }
+      }
+    >
+      -
+    </Text>
+  </Pressable>
+  <View
+    ref={null}
+    style={
+      [
+        {
+          "alignItems": "center",
+          "minWidth": 80,
+        },
+        {},
+      ]
+    }
+  >
+    <Text
+      ref={null}
+      style={
+        {
+          "color": "#1C1C1E",
+          "fontSize": 48,
+          "fontWeight": "bold",
+        }
+      }
+      testID="counter-value"
+    >
+      42
+    </Text>
+  </View>
+  <Pressable
+    accessibilityLabel="Increment"
+    accessibilityRole="button"
+    disabled={false}
+    onPress={[Function]}
+    ref={null}
+    style={
+      [
+        {
+          "alignItems": "center",
+          "backgroundColor": "#007AFF",
+          "borderRadius": 24,
+          "height": 48,
+          "justifyContent": "center",
+          "width": 48,
+        },
+        false,
+      ]
+    }
+    testID="counter-increment"
+  >
+    <Text
+      ref={null}
+      style={
+        {
+          "color": "#FFFFFF",
+          "fontSize": 24,
+          "fontWeight": "bold",
+        }
+      }
+    >
+      +
+    </Text>
+  </Pressable>
+  <Pressable
+    accessibilityLabel="Reset"
+    accessibilityRole="button"
+    onPress={[Function]}
+    ref={null}
+    style={
+      {
+        "backgroundColor": "#FF3B30",
+        "borderRadius": 8,
+        "paddingHorizontal": 16,
+        "paddingVertical": 8,
+      }
+    }
+    testID="counter-reset"
+  >
+    <Text
+      ref={null}
+      style={
+        {
+          "color": "#FFFFFF",
+          "fontSize": 14,
+          "fontWeight": "600",
+        }
+      }
+    >
+      Reset
+    </Text>
+  </Pressable>
+</View>
+`;

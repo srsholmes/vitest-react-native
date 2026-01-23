@@ -1,0 +1,280 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`CircularProgress > matches snapshot 1`] = `
+<View
+  ref={null}
+  style={
+    [
+      {
+        "alignItems": "center",
+        "justifyContent": "center",
+      },
+      {
+        "height": 100,
+        "width": 100,
+      },
+    ]
+  }
+  testID="circular"
+>
+  <View
+    ref={null}
+    style={
+      {
+        "position": "absolute",
+      }
+    }
+  >
+    <View
+      ref={null}
+      style={
+        [
+          {
+            "backgroundColor": "transparent",
+          },
+          {
+            "borderColor": "#E5E5EA",
+            "borderRadius": 45,
+            "borderWidth": 10,
+            "height": 90,
+            "width": 90,
+          },
+        ]
+      }
+    />
+  </View>
+  <View
+    ref={null}
+    style={
+      {
+        "position": "absolute",
+      }
+    }
+  >
+    <Text
+      ref={null}
+      style={
+        {
+          "color": "#1C1C1E",
+          "fontSize": 20,
+          "fontWeight": "bold",
+        }
+      }
+      testID="circular-label"
+    >
+      65
+      %
+    </Text>
+  </View>
+</View>
+`;
+
+exports[`ProgressBar > matches snapshot at 0% 1`] = `
+<View
+  ref={null}
+  style={
+    {
+      "width": "100%",
+    }
+  }
+  testID="progress"
+>
+  <View
+    ref={null}
+    style={
+      {
+        "marginBottom": 8,
+      }
+    }
+  >
+    <Text
+      ref={null}
+      style={
+        {
+          "color": "#1C1C1E",
+          "fontSize": 14,
+          "fontWeight": "600",
+        }
+      }
+      testID="progress-label"
+    >
+      0
+      %
+    </Text>
+  </View>
+  <View
+    ref={null}
+    style={
+      [
+        {
+          "overflow": "hidden",
+          "width": "100%",
+        },
+        {
+          "backgroundColor": "#E5E5EA",
+          "borderRadius": 4,
+          "height": 8,
+        },
+      ]
+    }
+  >
+    <View
+      ref={null}
+      style={
+        [
+          {
+            "height": "100%",
+          },
+          {
+            "backgroundColor": "#007AFF",
+            "borderRadius": 4,
+            "height": 8,
+          },
+          {},
+        ]
+      }
+      testID="progress-fill"
+    />
+  </View>
+</View>
+`;
+
+exports[`ProgressBar > matches snapshot at 50% 1`] = `
+<View
+  ref={null}
+  style={
+    {
+      "width": "100%",
+    }
+  }
+  testID="progress"
+>
+  <View
+    ref={null}
+    style={
+      {
+        "marginBottom": 8,
+      }
+    }
+  >
+    <Text
+      ref={null}
+      style={
+        {
+          "color": "#1C1C1E",
+          "fontSize": 14,
+          "fontWeight": "600",
+        }
+      }
+      testID="progress-label"
+    >
+      50
+      %
+    </Text>
+  </View>
+  <View
+    ref={null}
+    style={
+      [
+        {
+          "overflow": "hidden",
+          "width": "100%",
+        },
+        {
+          "backgroundColor": "#E5E5EA",
+          "borderRadius": 4,
+          "height": 8,
+        },
+      ]
+    }
+  >
+    <View
+      ref={null}
+      style={
+        [
+          {
+            "height": "100%",
+          },
+          {
+            "backgroundColor": "#007AFF",
+            "borderRadius": 4,
+            "height": 8,
+          },
+          {},
+        ]
+      }
+      testID="progress-fill"
+    />
+  </View>
+</View>
+`;
+
+exports[`ProgressBar > matches snapshot at 100% 1`] = `
+<View
+  ref={null}
+  style={
+    {
+      "width": "100%",
+    }
+  }
+  testID="progress"
+>
+  <View
+    ref={null}
+    style={
+      {
+        "marginBottom": 8,
+      }
+    }
+  >
+    <Text
+      ref={null}
+      style={
+        {
+          "color": "#1C1C1E",
+          "fontSize": 14,
+          "fontWeight": "600",
+        }
+      }
+      testID="progress-label"
+    >
+      100
+      %
+    </Text>
+  </View>
+  <View
+    ref={null}
+    style={
+      [
+        {
+          "overflow": "hidden",
+          "width": "100%",
+        },
+        {
+          "backgroundColor": "#E5E5EA",
+          "borderRadius": 4,
+          "height": 8,
+        },
+      ]
+    }
+  >
+    <View
+      ref={null}
+      style={
+        [
+          {
+            "height": "100%",
+          },
+          {
+            "backgroundColor": "#007AFF",
+            "borderRadius": 4,
+            "height": 8,
+          },
+          {},
+        ]
+      }
+      testID="progress-fill"
+    />
+  </View>
+</View>
+`;

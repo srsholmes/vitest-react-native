@@ -1,0 +1,18 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`SafeAreaView Component > matches snapshot 1`] = `
+<SafeAreaView
+  ref={null}
+  style={
+    {
+      "flex": 1,
+    }
+  }
+>
+  <Text
+    ref={null}
+  >
+    Safe Area Content
+  </Text>
+</SafeAreaView>
+`;

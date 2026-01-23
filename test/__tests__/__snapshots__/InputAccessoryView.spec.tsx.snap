@@ -1,0 +1,30 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`InputAccessoryView > matches snapshot 1`] = `
+<InputAccessoryView
+  nativeID="snapshot-accessory"
+>
+  <View
+    ref={null}
+  >
+    <Button
+      onPress={[Function]}
+    >
+      <Text
+        ref={null}
+      >
+        Cancel
+      </Text>
+    </Button>
+    <Button
+      onPress={[Function]}
+    >
+      <Text
+        ref={null}
+      >
+        Done
+      </Text>
+    </Button>
+  </View>
+</InputAccessoryView>
+`;

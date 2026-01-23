@@ -1,0 +1,27 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`ScrollView Component > matches snapshot 1`] = `
+<ScrollView
+  style={
+    {
+      "flex": 1,
+    }
+  }
+>
+  <Text
+    ref={null}
+  >
+    Item 1
+  </Text>
+  <Text
+    ref={null}
+  >
+    Item 2
+  </Text>
+  <Text
+    ref={null}
+  >
+    Item 3
+  </Text>
+</ScrollView>
+`;

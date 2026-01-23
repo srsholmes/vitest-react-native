@@ -1,0 +1,62 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`FlatList Component > matches snapshot 1`] = `
+<FlatList>
+  <View>
+    <Text
+      ref={null}
+    >
+      Header
+    </Text>
+  </View>
+  <View
+    ref={null}
+    style={
+      {
+        "padding": 10,
+      }
+    }
+  >
+    <Text
+      ref={null}
+    >
+      Item 1
+    </Text>
+  </View>
+  <View
+    ref={null}
+    style={
+      {
+        "padding": 10,
+      }
+    }
+  >
+    <Text
+      ref={null}
+    >
+      Item 2
+    </Text>
+  </View>
+  <View
+    ref={null}
+    style={
+      {
+        "padding": 10,
+      }
+    }
+  >
+    <Text
+      ref={null}
+    >
+      Item 3
+    </Text>
+  </View>
+  <View>
+    <Text
+      ref={null}
+    >
+      Footer
+    </Text>
+  </View>
+</FlatList>
+`;

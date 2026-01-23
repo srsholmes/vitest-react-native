@@ -1,0 +1,29 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`TouchableHighlight Component > matches snapshot 1`] = `
+<View
+  ref={null}
+>
+  <TouchableHighlight
+    ref={null}
+    style={
+      {
+        "backgroundColor": "blue",
+        "padding": 10,
+      }
+    }
+    underlayColor="darkblue"
+  >
+    <Text
+      ref={null}
+      style={
+        {
+          "color": "white",
+        }
+      }
+    >
+      Press Me
+    </Text>
+  </TouchableHighlight>
+</View>
+`;

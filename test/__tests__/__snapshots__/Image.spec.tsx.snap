@@ -1,0 +1,23 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`Image Component > matches snapshot 1`] = `
+<View
+  ref={null}
+>
+  <Image
+    ref={null}
+    resizeMode="cover"
+    source={
+      {
+        "uri": "https://example.com/image.png",
+      }
+    }
+    style={
+      {
+        "height": 200,
+        "width": 200,
+      }
+    }
+  />
+</View>
+`;

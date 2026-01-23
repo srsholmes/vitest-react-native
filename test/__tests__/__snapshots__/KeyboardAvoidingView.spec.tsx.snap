@@ -1,0 +1,28 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`KeyboardAvoidingView Component > matches snapshot with form layout 1`] = `
+<View
+  ref={null}
+  style={
+    {
+      "flex": 1,
+      "padding": 20,
+    }
+  }
+>
+  <TextInput
+    placeholder="Enter text"
+    ref={null}
+    style={
+      {
+        "marginBottom": 10,
+      }
+    }
+  />
+  <Text
+    ref={null}
+  >
+    Submit Form
+  </Text>
+</View>
+`;

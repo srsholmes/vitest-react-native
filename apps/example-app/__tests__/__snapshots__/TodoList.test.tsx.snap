@@ -1,0 +1,710 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`TodoList > matches snapshot when empty 1`] = `
+<View
+  ref={null}
+  style={
+    {
+      "backgroundColor": "#F2F2F7",
+      "flex": 1,
+      "padding": 16,
+    }
+  }
+  testID="todos"
+>
+  <Text
+    ref={null}
+    style={
+      {
+        "color": "#1C1C1E",
+        "fontSize": 32,
+        "fontWeight": "bold",
+        "marginBottom": 20,
+      }
+    }
+  >
+    Todo List
+  </Text>
+  <View
+    ref={null}
+    style={
+      [
+        {
+          "flexDirection": "row",
+          "gap": 12,
+          "marginBottom": 16,
+        },
+        {},
+      ]
+    }
+  >
+    <TextInput
+      onChangeText={[Function]}
+      onSubmitEditing={[Function]}
+      placeholder="Add a new todo..."
+      placeholderTextColor="#8E8E93"
+      ref={null}
+      returnKeyType="done"
+      style={
+        {
+          "backgroundColor": "#FFFFFF",
+          "borderRadius": 12,
+          "color": "#1C1C1E",
+          "flex": 1,
+          "fontSize": 16,
+          "height": 48,
+          "paddingHorizontal": 16,
+        }
+      }
+      testID="todos-input"
+      value=""
+    />
+    <Pressable
+      disabled={true}
+      ref={null}
+      style={
+        [
+          {
+            "alignItems": "center",
+            "backgroundColor": "#007AFF",
+            "borderRadius": 12,
+            "height": 48,
+            "justifyContent": "center",
+            "paddingHorizontal": 20,
+          },
+          {
+            "backgroundColor": "#C7C7CC",
+          },
+        ]
+      }
+      testID="todos-add"
+    >
+      <Text
+        ref={null}
+        style={
+          {
+            "color": "#FFFFFF",
+            "fontSize": 16,
+            "fontWeight": "600",
+          }
+        }
+      >
+        Add
+      </Text>
+    </Pressable>
+  </View>
+  <View
+    ref={null}
+    style={
+      {
+        "alignItems": "center",
+        "flexDirection": "row",
+        "justifyContent": "space-between",
+        "marginBottom": 12,
+      }
+    }
+  >
+    <Text
+      ref={null}
+      style={
+        {
+          "color": "#8E8E93",
+          "fontSize": 14,
+        }
+      }
+      testID="todos-stats"
+    >
+      0
+       of 
+      0
+       completed
+    </Text>
+  </View>
+  <FlatList
+    contentContainerStyle={
+      {
+        "gap": 8,
+      }
+    }
+    testID="todos-list"
+  >
+    <Text
+      ref={null}
+      style={
+        {
+          "color": "#8E8E93",
+          "fontSize": 16,
+          "marginTop": 40,
+          "textAlign": "center",
+        }
+      }
+      testID="todos-empty"
+    >
+      No todos yet. Add one above!
+    </Text>
+  </FlatList>
+</View>
+`;
+
+exports[`TodoList > matches snapshot with items 1`] = `
+<View
+  ref={null}
+  style={
+    {
+      "backgroundColor": "#F2F2F7",
+      "flex": 1,
+      "padding": 16,
+    }
+  }
+  testID="todos"
+>
+  <Text
+    ref={null}
+    style={
+      {
+        "color": "#1C1C1E",
+        "fontSize": 32,
+        "fontWeight": "bold",
+        "marginBottom": 20,
+      }
+    }
+  >
+    Todo List
+  </Text>
+  <View
+    ref={null}
+    style={
+      [
+        {
+          "flexDirection": "row",
+          "gap": 12,
+          "marginBottom": 16,
+        },
+        {},
+      ]
+    }
+  >
+    <TextInput
+      onChangeText={[Function]}
+      onSubmitEditing={[Function]}
+      placeholder="Add a new todo..."
+      placeholderTextColor="#8E8E93"
+      ref={null}
+      returnKeyType="done"
+      style={
+        {
+          "backgroundColor": "#FFFFFF",
+          "borderRadius": 12,
+          "color": "#1C1C1E",
+          "flex": 1,
+          "fontSize": 16,
+          "height": 48,
+          "paddingHorizontal": 16,
+        }
+      }
+      testID="todos-input"
+      value=""
+    />
+    <Pressable
+      disabled={true}
+      ref={null}
+      style={
+        [
+          {
+            "alignItems": "center",
+            "backgroundColor": "#007AFF",
+            "borderRadius": 12,
+            "height": 48,
+            "justifyContent": "center",
+            "paddingHorizontal": 20,
+          },
+          {
+            "backgroundColor": "#C7C7CC",
+          },
+        ]
+      }
+      testID="todos-add"
+    >
+      <Text
+        ref={null}
+        style={
+          {
+            "color": "#FFFFFF",
+            "fontSize": 16,
+            "fontWeight": "600",
+          }
+        }
+      >
+        Add
+      </Text>
+    </Pressable>
+  </View>
+  <View
+    ref={null}
+    style={
+      {
+        "alignItems": "center",
+        "flexDirection": "row",
+        "justifyContent": "space-between",
+        "marginBottom": 12,
+      }
+    }
+  >
+    <Text
+      ref={null}
+      style={
+        {
+          "color": "#8E8E93",
+          "fontSize": 14,
+        }
+      }
+      testID="todos-stats"
+    >
+      1
+       of 
+      3
+       completed
+    </Text>
+    <Pressable
+      onPress={[Function]}
+      ref={null}
+      style={
+        {
+          "padding": 8,
+        }
+      }
+      testID="todos-clear"
+    >
+      <Text
+        ref={null}
+        style={
+          {
+            "color": "#FF3B30",
+            "fontSize": 14,
+          }
+        }
+      >
+        Clear completed
+      </Text>
+    </Pressable>
+  </View>
+  <FlatList
+    contentContainerStyle={
+      {
+        "gap": 8,
+      }
+    }
+    testID="todos-list"
+  >
+    <View
+      entering={
+        {
+          "damping": [Function],
+          "delay": [Function],
+          "duration": [Function],
+          "springify": [Function],
+          "stiffness": [Function],
+          "withCallback": [Function],
+          "withInitialValues": [Function],
+        }
+      }
+      exiting={
+        {
+          "damping": [Function],
+          "delay": [Function],
+          "duration": [Function],
+          "springify": [Function],
+          "stiffness": [Function],
+          "withCallback": [Function],
+          "withInitialValues": [Function],
+        }
+      }
+      layout={
+        {
+          "damping": [Function],
+          "delay": [Function],
+          "duration": [Function],
+          "springify": [Function],
+          "stiffness": [Function],
+          "withCallback": [Function],
+          "withInitialValues": [Function],
+        }
+      }
+      ref={null}
+      style={
+        [
+          {
+            "alignItems": "center",
+            "backgroundColor": "#FFFFFF",
+            "borderRadius": 12,
+            "flexDirection": "row",
+            "gap": 12,
+            "padding": 16,
+          },
+          {},
+        ]
+      }
+      testID="todos-item-0"
+    >
+      <Pressable
+        accessibilityRole="checkbox"
+        accessibilityState={
+          {
+            "checked": false,
+          }
+        }
+        onPress={[Function]}
+        ref={null}
+        style={
+          {
+            "height": 24,
+            "width": 24,
+          }
+        }
+        testID="todos-item-0-toggle"
+      >
+        <View
+          ref={null}
+          style={
+            [
+              {
+                "alignItems": "center",
+                "borderColor": "#C7C7CC",
+                "borderRadius": 12,
+                "borderWidth": 2,
+                "height": 24,
+                "justifyContent": "center",
+                "width": 24,
+              },
+              false,
+            ]
+          }
+        />
+      </Pressable>
+      <Text
+        ref={null}
+        style={
+          [
+            {
+              "color": "#1C1C1E",
+              "flex": 1,
+              "fontSize": 16,
+            },
+            false,
+          ]
+        }
+        testID="todos-item-0-text"
+      >
+        Buy groceries
+      </Text>
+      <Pressable
+        accessibilityLabel="Delete todo"
+        accessibilityRole="button"
+        onPress={[Function]}
+        ref={null}
+        style={
+          {
+            "alignItems": "center",
+            "height": 32,
+            "justifyContent": "center",
+            "width": 32,
+          }
+        }
+        testID="todos-item-0-delete"
+      >
+        <Text
+          ref={null}
+          style={
+            {
+              "color": "#FF3B30",
+              "fontSize": 24,
+              "fontWeight": "300",
+            }
+          }
+        >
+          ×
+        </Text>
+      </Pressable>
+    </View>
+    <View
+      entering={
+        {
+          "damping": [Function],
+          "delay": [Function],
+          "duration": [Function],
+          "springify": [Function],
+          "stiffness": [Function],
+          "withCallback": [Function],
+          "withInitialValues": [Function],
+        }
+      }
+      exiting={
+        {
+          "damping": [Function],
+          "delay": [Function],
+          "duration": [Function],
+          "springify": [Function],
+          "stiffness": [Function],
+          "withCallback": [Function],
+          "withInitialValues": [Function],
+        }
+      }
+      layout={
+        {
+          "damping": [Function],
+          "delay": [Function],
+          "duration": [Function],
+          "springify": [Function],
+          "stiffness": [Function],
+          "withCallback": [Function],
+          "withInitialValues": [Function],
+        }
+      }
+      ref={null}
+      style={
+        [
+          {
+            "alignItems": "center",
+            "backgroundColor": "#FFFFFF",
+            "borderRadius": 12,
+            "flexDirection": "row",
+            "gap": 12,
+            "padding": 16,
+          },
+          {},
+        ]
+      }
+      testID="todos-item-1"
+    >
+      <Pressable
+        accessibilityRole="checkbox"
+        accessibilityState={
+          {
+            "checked": true,
+          }
+        }
+        onPress={[Function]}
+        ref={null}
+        style={
+          {
+            "height": 24,
+            "width": 24,
+          }
+        }
+        testID="todos-item-1-toggle"
+      >
+        <View
+          ref={null}
+          style={
+            [
+              {
+                "alignItems": "center",
+                "borderColor": "#C7C7CC",
+                "borderRadius": 12,
+                "borderWidth": 2,
+                "height": 24,
+                "justifyContent": "center",
+                "width": 24,
+              },
+              {
+                "backgroundColor": "#34C759",
+                "borderColor": "#34C759",
+              },
+            ]
+          }
+        >
+          <Text
+            ref={null}
+            style={
+              {
+                "color": "#FFFFFF",
+                "fontSize": 14,
+                "fontWeight": "bold",
+              }
+            }
+          >
+            ✓
+          </Text>
+        </View>
+      </Pressable>
+      <Text
+        ref={null}
+        style={
+          [
+            {
+              "color": "#1C1C1E",
+              "flex": 1,
+              "fontSize": 16,
+            },
+            {
+              "color": "#8E8E93",
+              "textDecorationLine": "line-through",
+            },
+          ]
+        }
+        testID="todos-item-1-text"
+      >
+        Walk the dog
+      </Text>
+      <Pressable
+        accessibilityLabel="Delete todo"
+        accessibilityRole="button"
+        onPress={[Function]}
+        ref={null}
+        style={
+          {
+            "alignItems": "center",
+            "height": 32,
+            "justifyContent": "center",
+            "width": 32,
+          }
+        }
+        testID="todos-item-1-delete"
+      >
+        <Text
+          ref={null}
+          style={
+            {
+              "color": "#FF3B30",
+              "fontSize": 24,
+              "fontWeight": "300",
+            }
+          }
+        >
+          ×
+        </Text>
+      </Pressable>
+    </View>
+    <View
+      entering={
+        {
+          "damping": [Function],
+          "delay": [Function],
+          "duration": [Function],
+          "springify": [Function],
+          "stiffness": [Function],
+          "withCallback": [Function],
+          "withInitialValues": [Function],
+        }
+      }
+      exiting={
+        {
+          "damping": [Function],
+          "delay": [Function],
+          "duration": [Function],
+          "springify": [Function],
+          "stiffness": [Function],
+          "withCallback": [Function],
+          "withInitialValues": [Function],
+        }
+      }
+      layout={
+        {
+          "damping": [Function],
+          "delay": [Function],
+          "duration": [Function],
+          "springify": [Function],
+          "stiffness": [Function],
+          "withCallback": [Function],
+          "withInitialValues": [Function],
+        }
+      }
+      ref={null}
+      style={
+        [
+          {
+            "alignItems": "center",
+            "backgroundColor": "#FFFFFF",
+            "borderRadius": 12,
+            "flexDirection": "row",
+            "gap": 12,
+            "padding": 16,
+          },
+          {},
+        ]
+      }
+      testID="todos-item-2"
+    >
+      <Pressable
+        accessibilityRole="checkbox"
+        accessibilityState={
+          {
+            "checked": false,
+          }
+        }
+        onPress={[Function]}
+        ref={null}
+        style={
+          {
+            "height": 24,
+            "width": 24,
+          }
+        }
+        testID="todos-item-2-toggle"
+      >
+        <View
+          ref={null}
+          style={
+            [
+              {
+                "alignItems": "center",
+                "borderColor": "#C7C7CC",
+                "borderRadius": 12,
+                "borderWidth": 2,
+                "height": 24,
+                "justifyContent": "center",
+                "width": 24,
+              },
+              false,
+            ]
+          }
+        />
+      </Pressable>
+      <Text
+        ref={null}
+        style={
+          [
+            {
+              "color": "#1C1C1E",
+              "flex": 1,
+              "fontSize": 16,
+            },
+            false,
+          ]
+        }
+        testID="todos-item-2-text"
+      >
+        Read a book
+      </Text>
+      <Pressable
+        accessibilityLabel="Delete todo"
+        accessibilityRole="button"
+        onPress={[Function]}
+        ref={null}
+        style={
+          {
+            "alignItems": "center",
+            "height": 32,
+            "justifyContent": "center",
+            "width": 32,
+          }
+        }
+        testID="todos-item-2-delete"
+      >
+        <Text
+          ref={null}
+          style={
+            {
+              "color": "#FF3B30",
+              "fontSize": 24,
+              "fontWeight": "300",
+            }
+          }
+        >
+          ×
+        </Text>
+      </Pressable>
+    </View>
+  </FlatList>
+</View>
+`;

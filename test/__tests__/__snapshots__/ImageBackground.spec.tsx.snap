@@ -1,0 +1,29 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`ImageBackground Component > matches snapshot 1`] = `
+<Image
+  ref={null}
+  source={
+    {
+      "uri": "https://example.com/image.png",
+    }
+  }
+  style={
+    {
+      "height": 200,
+      "width": 200,
+    }
+  }
+>
+  <Text
+    ref={null}
+    style={
+      {
+        "color": "white",
+      }
+    }
+  >
+    Background Image
+  </Text>
+</Image>
+`;

@@ -1,0 +1,18 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`View Component > matches snapshot 1`] = `
+<View
+  ref={null}
+  style={
+    {
+      "flex": 1,
+    }
+  }
+>
+  <Text
+    ref={null}
+  >
+    Snapshot test
+  </Text>
+</View>
+`;

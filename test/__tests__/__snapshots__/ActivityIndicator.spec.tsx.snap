@@ -1,0 +1,28 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`ActivityIndicator Component > matches snapshot with all props 1`] = `
+<View
+  ref={null}
+  style={
+    {
+      "alignItems": "center",
+      "flex": 1,
+      "justifyContent": "center",
+    }
+  }
+>
+  <ActivityIndicator
+    animating={true}
+    color="#0000ff"
+    hidesWhenStopped={false}
+    ref={null}
+    size="large"
+  />
+</View>
+`;
+
+exports[`ActivityIndicator Component > matches snapshot with default props 1`] = `
+<ActivityIndicator
+  ref={null}
+/>
+`;

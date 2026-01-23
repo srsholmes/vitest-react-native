@@ -1,0 +1,66 @@
+{
+  "name": "@srsholmes/vitest-react-native",
+  "version": "0.0.1",
+  "description": "Support for running React Native inside Vitest",
+  "type": "module",
+  "main": "./dist/plugin.js",
+  "types": "./dist/plugin.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/plugin.js",
+      "types": "./dist/plugin.d.ts"
+    },
+    "./setup": {
+      "import": "./dist/setup.js",
+      "types": "./dist/setup.d.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "prepublishOnly": "pnpm run build"
+  },
+  "files": [
+    "dist"
+  ],
+  "author": "Simon Holmes",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/srsholmes/vitest-react-native.git",
+    "directory": "packages/vitest-react-native"
+  },
+  "bugs": {
+    "url": "https://github.com/srsholmes/vitest-react-native/issues"
+  },
+  "homepage": "https://github.com/srsholmes/vitest-react-native#readme",
+  "keywords": [
+    "vitest",
+    "react-native",
+    "testing",
+    "vite",
+    "test"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "peerDependencies": {
+    "react": ">=18",
+    "react-native": ">=0.72",
+    "vite": ">=5",
+    "vitest": ">=1"
+  },
+  "dependencies": {
+    "@react-native/polyfills": "^2.0.0",
+    "esbuild": "^0.24.2",
+    "flow-remove-types": "^2.257.1",
+    "pirates": "^4.0.6",
+    "regenerator-runtime": "^0.14.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.7",
+    "typescript": "^5.7.3",
+    "vite": "^6.0.7",
+    "vitest": "^2.1.8"
+  }
+}

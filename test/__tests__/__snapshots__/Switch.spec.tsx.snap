@@ -1,0 +1,23 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`Switch Component > matches snapshot with value false 1`] = `
+<View
+  ref={null}
+>
+  <Switch
+    ref={null}
+    value={false}
+  />
+</View>
+`;
+
+exports[`Switch Component > matches snapshot with value true 1`] = `
+<View
+  ref={null}
+>
+  <Switch
+    ref={null}
+    value={true}
+  />
+</View>
+`;

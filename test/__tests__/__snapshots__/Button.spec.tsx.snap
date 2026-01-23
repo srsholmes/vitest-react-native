@@ -1,0 +1,36 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`Button Component > matches snapshot 1`] = `
+<View
+  ref={null}
+>
+  <Button
+    onPress={[Function]}
+    testID="snapshot-button"
+  >
+    <Text
+      ref={null}
+    >
+      Snapshot Button
+    </Text>
+  </Button>
+</View>
+`;
+
+exports[`Button Component > matches snapshot with disabled 1`] = `
+<View
+  ref={null}
+>
+  <Button
+    disabled={true}
+    onPress={[Function]}
+    testID="disabled-button"
+  >
+    <Text
+      ref={null}
+    >
+      Disabled Button
+    </Text>
+  </Button>
+</View>
+`;

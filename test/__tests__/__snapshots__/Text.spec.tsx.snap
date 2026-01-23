@@ -1,0 +1,29 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`Text Component > matches snapshot 1`] = `
+<View
+  ref={null}
+>
+  <Text
+    ref={null}
+    style={
+      {
+        "fontSize": 24,
+        "fontWeight": "bold",
+      }
+    }
+  >
+    Title
+  </Text>
+  <Text
+    ref={null}
+    style={
+      {
+        "color": "gray",
+      }
+    }
+  >
+    Subtitle
+  </Text>
+</View>
+`;

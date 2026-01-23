@@ -1,0 +1,15 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`TouchableNativeFeedback > matches snapshot 1`] = `
+<TouchableNativeFeedback>
+  <View
+    ref={null}
+  >
+    <Text
+      ref={null}
+    >
+      Native Feedback
+    </Text>
+  </View>
+</TouchableNativeFeedback>
+`;

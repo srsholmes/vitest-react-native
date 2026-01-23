@@ -1,0 +1,39 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`Modal Component > matches snapshot when not visible 1`] = `null`;
+
+exports[`Modal Component > matches snapshot when visible 1`] = `
+<Modal
+  animationType="slide"
+  transparent={true}
+  visible={true}
+>
+  <View
+    ref={null}
+    style={
+      {
+        "alignItems": "center",
+        "flex": 1,
+        "justifyContent": "center",
+      }
+    }
+  >
+    <View
+      ref={null}
+      style={
+        {
+          "backgroundColor": "white",
+          "borderRadius": 10,
+          "padding": 20,
+        }
+      }
+    >
+      <Text
+        ref={null}
+      >
+        Modal Content
+      </Text>
+    </View>
+  </View>
+</Modal>
+`;

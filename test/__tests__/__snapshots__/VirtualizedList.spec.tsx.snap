@@ -1,0 +1,33 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`VirtualizedList > matches snapshot 1`] = `
+<VirtualizedList>
+  <View
+    ref={null}
+  >
+    <Text
+      ref={null}
+    >
+      Item 1
+    </Text>
+  </View>
+  <View
+    ref={null}
+  >
+    <Text
+      ref={null}
+    >
+      Item 2
+    </Text>
+  </View>
+  <View
+    ref={null}
+  >
+    <Text
+      ref={null}
+    >
+      Item 3
+    </Text>
+  </View>
+</VirtualizedList>
+`;

@@ -1,0 +1,234 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`AnimatedCard > matches snapshot with image and liked 1`] = `
+<Pressable
+  accessibilityRole="button"
+  onPressIn={[Function]}
+  onPressOut={[Function]}
+  ref={null}
+  style={
+    [
+      {
+        "backgroundColor": "#FFFFFF",
+        "borderRadius": 16,
+        "elevation": 4,
+        "overflow": "hidden",
+        "shadowColor": "#000",
+        "shadowOffset": {
+          "height": 2,
+          "width": 0,
+        },
+        "shadowOpacity": 0.2,
+        "shadowRadius": 8,
+      },
+      {},
+    ]
+  }
+  testID="card"
+>
+  <Image
+    ref={null}
+    resizeMode="cover"
+    source={
+      {
+        "uri": "https://example.com/image.jpg",
+      }
+    }
+    style={
+      {
+        "backgroundColor": "#E5E5EA",
+        "height": 180,
+        "width": "100%",
+      }
+    }
+    testID="card-image"
+  />
+  <View
+    ref={null}
+    style={
+      {
+        "padding": 16,
+      }
+    }
+  >
+    <Text
+      numberOfLines={2}
+      ref={null}
+      style={
+        {
+          "color": "#1C1C1E",
+          "fontSize": 20,
+          "fontWeight": "700",
+          "marginBottom": 8,
+        }
+      }
+      testID="card-title"
+    >
+      Test Card
+    </Text>
+    <Text
+      numberOfLines={3}
+      ref={null}
+      style={
+        {
+          "color": "#8E8E93",
+          "fontSize": 14,
+          "lineHeight": 20,
+          "marginBottom": 12,
+        }
+      }
+      testID="card-description"
+    >
+      This is a test description for the card.
+    </Text>
+    <View
+      ref={null}
+      style={
+        {
+          "flexDirection": "row",
+          "justifyContent": "flex-end",
+        }
+      }
+    >
+      <Pressable
+        accessibilityLabel="Unlike"
+        accessibilityRole="button"
+        onPress={[Function]}
+        ref={null}
+        style={
+          [
+            {
+              "padding": 8,
+            },
+            {},
+          ]
+        }
+        testID="card-like"
+      >
+        <Text
+          ref={null}
+          style={
+            [
+              {
+                "fontSize": 24,
+              },
+              {
+                "color": "#FF3B30",
+              },
+            ]
+          }
+        >
+          ❤️
+        </Text>
+      </Pressable>
+    </View>
+  </View>
+</Pressable>
+`;
+
+exports[`AnimatedCard > matches snapshot without image 1`] = `
+<Pressable
+  accessibilityRole="button"
+  onPressIn={[Function]}
+  onPressOut={[Function]}
+  ref={null}
+  style={
+    [
+      {
+        "backgroundColor": "#FFFFFF",
+        "borderRadius": 16,
+        "elevation": 4,
+        "overflow": "hidden",
+        "shadowColor": "#000",
+        "shadowOffset": {
+          "height": 2,
+          "width": 0,
+        },
+        "shadowOpacity": 0.2,
+        "shadowRadius": 8,
+      },
+      {},
+    ]
+  }
+  testID="card"
+>
+  <View
+    ref={null}
+    style={
+      {
+        "padding": 16,
+      }
+    }
+  >
+    <Text
+      numberOfLines={2}
+      ref={null}
+      style={
+        {
+          "color": "#1C1C1E",
+          "fontSize": 20,
+          "fontWeight": "700",
+          "marginBottom": 8,
+        }
+      }
+      testID="card-title"
+    >
+      Test Card
+    </Text>
+    <Text
+      numberOfLines={3}
+      ref={null}
+      style={
+        {
+          "color": "#8E8E93",
+          "fontSize": 14,
+          "lineHeight": 20,
+          "marginBottom": 12,
+        }
+      }
+      testID="card-description"
+    >
+      This is a test description for the card.
+    </Text>
+    <View
+      ref={null}
+      style={
+        {
+          "flexDirection": "row",
+          "justifyContent": "flex-end",
+        }
+      }
+    >
+      <Pressable
+        accessibilityLabel="Like"
+        accessibilityRole="button"
+        onPress={[Function]}
+        ref={null}
+        style={
+          [
+            {
+              "padding": 8,
+            },
+            {},
+          ]
+        }
+        testID="card-like"
+      >
+        <Text
+          ref={null}
+          style={
+            [
+              {
+                "fontSize": 24,
+              },
+              false,
+            ]
+          }
+        >
+          🤍
+        </Text>
+      </Pressable>
+    </View>
+  </View>
+</Pressable>
+`;
