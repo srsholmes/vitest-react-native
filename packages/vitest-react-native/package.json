@@ -1,18 +1,21 @@
 {
   "name": "@srsholmes/vitest-react-native",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Support for running React Native inside Vitest",
   "type": "module",
-  "main": "./dist/plugin.js",
+  "main": "./dist/plugin.cjs",
+  "module": "./dist/plugin.js",
   "types": "./dist/plugin.d.ts",
   "exports": {
     ".": {
       "types": "./dist/plugin.d.ts",
-      "import": "./dist/plugin.js"
+      "import": "./dist/plugin.js",
+      "require": "./dist/plugin.cjs"
     },
     "./setup": {
       "types": "./dist/setup.d.ts",
-      "import": "./dist/setup.js"
+      "import": "./dist/setup.js",
+      "require": "./dist/setup.cjs"
     }
   },
   "engines": {
@@ -20,7 +23,7 @@
   },
   "sideEffects": false,
   "scripts": {
-    "build": "tsc",
+    "build": "node build.mjs",
     "dev": "tsc --watch",
     "prepublishOnly": "pnpm run build"
   },
