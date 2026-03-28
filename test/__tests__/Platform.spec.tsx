@@ -1,3 +1,5 @@
+import React from 'react';
+import { render } from '@testing-library/react-native';
 import { test, expect, describe } from 'vitest';
 import { Platform, PlatformIOSStatic } from 'react-native';
 
@@ -91,5 +93,45 @@ describe('Platform', () => {
     expect(Platform.constants.reactNativeVersion.major).toBeDefined();
     expect(Platform.constants.reactNativeVersion.minor).toBeDefined();
     expect(Platform.constants.reactNativeVersion.patch).toBeDefined();
+  });
+
+  test('deep Platform import exposes the mocked platform as default export', () => {
+    const platformModule = require('react-native/Libraries/Utilities/Platform');
+
+    expect(platformModule.default.OS).toBe('ios');
+  });
+
+  test('deep Platform import also exposes direct CommonJS properties', () => {
+    const platformModule = require('react-native/Libraries/Utilities/Platform');
+
+    expect(platformModule.OS).toBe('ios');
+  });
+
+  test('processColor can read Platform.OS through the compatibility shim', () => {
+    const { processColor } = require('react-native');
+
+    expect(() => processColor('black')).not.toThrow();
+  });
+
+  test('deep processColor import can read Platform.OS through the compatibility shim', () => {
+    const processColor = require('react-native/Libraries/StyleSheet/processColor').default;
+
+    expect(() => processColor('black')).not.toThrow();
+  });
+
+  test('react-native-svg can import react-native processColor without crashing', () => {
+    expect(() => require('react-native-svg')).not.toThrow();
+  });
+
+  test('react-native-svg shapes can render without crashing in processColor', () => {
+    const { Svg, Circle } = require('react-native-svg');
+
+    expect(() =>
+      render(
+        <Svg>
+          <Circle cx={10} cy={10} r={5} fill="black" />
+        </Svg>
+      )
+    ).not.toThrow();
   });
 });

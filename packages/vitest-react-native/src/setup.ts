@@ -365,9 +365,8 @@ mock(
 // Platform
 mock(
   'react-native/Libraries/Utilities/Platform',
-  () => `{
-  __esModule: true,
-  default: {
+  () => `(() => {
+  const Platform = {
     OS: 'ios',
     Version: '17.0',
     isPad: false,
@@ -382,8 +381,9 @@ mock(
       if ('native' in obj) return obj.native;
       return obj.default;
     },
-  },
-}`
+  };
+  return { __esModule: true, default: Platform, ...Platform };
+})()`
 );
 
 // UIManager
