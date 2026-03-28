@@ -16,6 +16,7 @@ exports[`Counter > matches snapshot 1`] = `
   <Pressable
     accessibilityLabel="Decrement"
     accessibilityRole="button"
+    accessible={true}
     disabled={false}
     onPress={[Function]}
     ref={null}
@@ -76,6 +77,7 @@ exports[`Counter > matches snapshot 1`] = `
   <Pressable
     accessibilityLabel="Increment"
     accessibilityRole="button"
+    accessible={true}
     disabled={false}
     onPress={[Function]}
     ref={null}
@@ -110,6 +112,7 @@ exports[`Counter > matches snapshot 1`] = `
   <Pressable
     accessibilityLabel="Reset"
     accessibilityRole="button"
+    accessible={true}
     onPress={[Function]}
     ref={null}
     style={

@@ -264,6 +264,19 @@ try {
 // ============================================================================
 // STEP 7: Mock registration helper
 // ============================================================================
+const createAccessibleTouchableMock = (displayName: string): string => `(() => {
+  const React = require('react');
+  const ${displayName} = React.forwardRef((props, ref) => {
+    return React.createElement('${displayName}', {
+      ...props,
+      accessible: props.accessible !== false,
+      ref,
+    }, props.children);
+  });
+  ${displayName}.displayName = '${displayName}';
+  return { __esModule: true, default: ${displayName} };
+})()`;
+
 
 const mock = (modulePath: string, mockCode: string | (() => string)): void => {
   const code = typeof mockCode === 'function' ? mockCode() : mockCode;
@@ -725,6 +738,7 @@ mock(
   () => `(() => {
   const React = require('react');
   const Pressable = React.forwardRef((props, ref) => {
+      accessible: rest.accessible !== false,
     const { children, style, disabled, onPress, onPressIn, onPressOut, onLongPress, ...rest } = props;
     const resolvedStyle = typeof style === 'function' ? style({ pressed: false }) : style;
     const resolvedChildren = typeof children === 'function' ? children({ pressed: false }) : children;
@@ -746,29 +760,13 @@ mock(
 );
 
 // TouchableOpacity
-mock(
-  'react-native/Libraries/Components/Touchable/TouchableOpacity',
-  () => `(() => {
-  const React = require('react');
-  const TouchableOpacity = React.forwardRef((props, ref) => {
-    return React.createElement('TouchableOpacity', { ...props, ref }, props.children);
-  });
-  TouchableOpacity.displayName = 'TouchableOpacity';
-  return { __esModule: true, default: TouchableOpacity };
-})()`
+mock('react-native/Libraries/Components/Touchable/TouchableOpacity', () =>
+  createAccessibleTouchableMock('TouchableOpacity')
 );
 
 // TouchableHighlight
-mock(
-  'react-native/Libraries/Components/Touchable/TouchableHighlight',
-  () => `(() => {
-  const React = require('react');
-  const TouchableHighlight = React.forwardRef((props, ref) => {
-    return React.createElement('TouchableHighlight', { ...props, ref }, props.children);
-  });
-  TouchableHighlight.displayName = 'TouchableHighlight';
-  return { __esModule: true, default: TouchableHighlight };
-})()`
+mock('react-native/Libraries/Components/Touchable/TouchableHighlight', () =>
+  createAccessibleTouchableMock('TouchableHighlight')
 );
 
 // SafeAreaView
@@ -1317,16 +1315,8 @@ mock(
 );
 
 // TouchableWithoutFeedback
-mock(
-  'react-native/Libraries/Components/Touchable/TouchableWithoutFeedback',
-  () => `(() => {
-  const React = require('react');
-  const TouchableWithoutFeedback = React.forwardRef((props, ref) => {
-    return React.createElement('TouchableWithoutFeedback', { ...props, ref }, props.children);
-  });
-  TouchableWithoutFeedback.displayName = 'TouchableWithoutFeedback';
-  return { __esModule: true, default: TouchableWithoutFeedback };
-})()`
+mock('react-native/Libraries/Components/Touchable/TouchableWithoutFeedback', () =>
+  createAccessibleTouchableMock('TouchableWithoutFeedback')
 );
 
 // VirtualizedList
@@ -1493,7 +1483,10 @@ mock(
   const React = require('react');
   class TouchableNativeFeedback extends React.Component {
     render() {
-      return React.createElement('TouchableNativeFeedback', this.props, this.props.children);
+      return React.createElement('TouchableNativeFeedback', {
+        ...this.props,
+        accessible: this.props.accessible !== false,
+      }, this.props.children);
     }
   }
   TouchableNativeFeedback.displayName = 'TouchableNativeFeedback';

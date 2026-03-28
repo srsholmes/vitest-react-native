@@ -5,6 +5,7 @@ exports[`TouchableOpacity Component > matches snapshot 1`] = `
   ref={null}
 >
   <TouchableOpacity
+    accessible={true}
     ref={null}
     style={
       {

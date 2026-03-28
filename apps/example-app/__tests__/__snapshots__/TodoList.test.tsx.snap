@@ -60,6 +60,7 @@ exports[`TodoList > matches snapshot when empty 1`] = `
       value=""
     />
     <Pressable
+      accessible={true}
       disabled={true}
       ref={null}
       style={
@@ -206,6 +207,7 @@ exports[`TodoList > matches snapshot with items 1`] = `
       value=""
     />
     <Pressable
+      accessible={true}
       disabled={true}
       ref={null}
       style={
@@ -266,6 +268,7 @@ exports[`TodoList > matches snapshot with items 1`] = `
        completed
     </Text>
     <Pressable
+      accessible={true}
       onPress={[Function]}
       ref={null}
       style={
@@ -353,6 +356,7 @@ exports[`TodoList > matches snapshot with items 1`] = `
             "checked": false,
           }
         }
+        accessible={true}
         onPress={[Function]}
         ref={null}
         style={
@@ -400,6 +404,7 @@ exports[`TodoList > matches snapshot with items 1`] = `
       <Pressable
         accessibilityLabel="Delete todo"
         accessibilityRole="button"
+        accessible={true}
         onPress={[Function]}
         ref={null}
         style={
@@ -483,6 +488,7 @@ exports[`TodoList > matches snapshot with items 1`] = `
             "checked": true,
           }
         }
+        accessible={true}
         onPress={[Function]}
         ref={null}
         style={
@@ -549,6 +555,7 @@ exports[`TodoList > matches snapshot with items 1`] = `
       <Pressable
         accessibilityLabel="Delete todo"
         accessibilityRole="button"
+        accessible={true}
         onPress={[Function]}
         ref={null}
         style={
@@ -632,6 +639,7 @@ exports[`TodoList > matches snapshot with items 1`] = `
             "checked": false,
           }
         }
+        accessible={true}
         onPress={[Function]}
         ref={null}
         style={
@@ -679,6 +687,7 @@ exports[`TodoList > matches snapshot with items 1`] = `
       <Pressable
         accessibilityLabel="Delete todo"
         accessibilityRole="button"
+        accessible={true}
         onPress={[Function]}
         ref={null}
         style={

@@ -5,6 +5,7 @@ exports[`Pressable Component > matches snapshot 1`] = `
   ref={null}
 >
   <Pressable
+    accessible={true}
     ref={null}
     style={
       {

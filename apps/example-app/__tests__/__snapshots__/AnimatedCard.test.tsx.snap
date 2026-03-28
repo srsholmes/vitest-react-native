@@ -3,6 +3,7 @@
 exports[`AnimatedCard > matches snapshot with image and liked 1`] = `
 <Pressable
   accessibilityRole="button"
+  accessible={true}
   onPressIn={[Function]}
   onPressOut={[Function]}
   ref={null}
@@ -93,6 +94,7 @@ exports[`AnimatedCard > matches snapshot with image and liked 1`] = `
       <Pressable
         accessibilityLabel="Unlike"
         accessibilityRole="button"
+        accessible={true}
         onPress={[Function]}
         ref={null}
         style={
@@ -129,6 +131,7 @@ exports[`AnimatedCard > matches snapshot with image and liked 1`] = `
 exports[`AnimatedCard > matches snapshot without image 1`] = `
 <Pressable
   accessibilityRole="button"
+  accessible={true}
   onPressIn={[Function]}
   onPressOut={[Function]}
   ref={null}
@@ -202,6 +205,7 @@ exports[`AnimatedCard > matches snapshot without image 1`] = `
       <Pressable
         accessibilityLabel="Like"
         accessibilityRole="button"
+        accessible={true}
         onPress={[Function]}
         ref={null}
         style={

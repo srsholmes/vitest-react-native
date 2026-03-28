@@ -1,6 +1,6 @@
 import React from 'react';
 import { test, expect, describe, vi } from 'vitest';
-import { render, fireEvent } from '@testing-library/react-native';
+import { render, fireEvent, screen } from '@testing-library/react-native';
 import { TouchableOpacity, Text, View } from 'react-native';
 
 describe('TouchableOpacity Component', () => {
@@ -96,6 +96,16 @@ describe('TouchableOpacity Component', () => {
       </TouchableOpacity>
     );
     expect(getByTestId('accessible-touchable')).toBeTruthy();
+  });
+
+  test('supports role queries without explicitly setting accessible', () => {
+    render(
+      <TouchableOpacity accessibilityRole="button">
+        <Text>Activate</Text>
+      </TouchableOpacity>
+    );
+
+    expect(screen.getByRole('button')).toBeTruthy();
   });
 
   test('matches snapshot', () => {
