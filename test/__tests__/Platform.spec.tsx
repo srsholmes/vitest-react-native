@@ -110,4 +110,19 @@ describe('Platform', () => {
     expect(PlatformModule.OS).toBe('ios');
     expect(PlatformModule.select).toBeDefined();
   });
+
+  // Tests from PR #8: verify processColor and react-native-svg work
+  test('processColor can read Platform.OS through the compatibility shim', () => {
+    const { processColor } = require('react-native');
+    expect(() => processColor('black')).not.toThrow();
+  });
+
+  test('deep processColor import works via default export', () => {
+    const processColor = require('react-native/Libraries/StyleSheet/processColor').default;
+    expect(() => processColor('black')).not.toThrow();
+  });
+
+  test('react-native-svg can import without crashing', () => {
+    expect(() => require('react-native-svg')).not.toThrow();
+  });
 });

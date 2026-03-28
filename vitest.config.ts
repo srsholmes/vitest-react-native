@@ -3,31 +3,47 @@ import { defineConfig } from 'vitest/config';
 import { resolve } from 'path';
 import { createRequire } from 'module';
 import type { Plugin } from 'vite';
+import * as esbuild from 'esbuild';
 
 const require = createRequire(import.meta.url);
 const removeTypes = require('flow-remove-types');
 
-function flowRemoveTypesPlugin(): Plugin {
+function reactNativeDependencyTransformPlugin(): Plugin {
+  const rnSpecificExts = ['.ios.js', '.ios.jsx', '.android.js', '.android.jsx', '.native.js', '.native.jsx'];
+  const transformableExts = ['.js', '.jsx', ...rnSpecificExts];
+
   return {
-    name: 'flow-remove-types',
+    name: 'react-native-dependency-transform',
     enforce: 'pre',
     transform(code, id) {
       const normalized = id.replace(/\\/g, '/');
-      if (
-        (normalized.includes('/node_modules/react-native/') ||
-          normalized.includes('/node_modules/@react-native/') ||
-          normalized.includes('/node_modules/@react-native-community/')) &&
-        (id.endsWith('.js') || id.endsWith('.ios.js'))
-      ) {
-        const result = removeTypes(code, { all: true }).toString();
-        return { code: result, map: null };
-      }
+      if (!transformableExts.some((ext) => normalized.endsWith(ext))) return;
+      if (!normalized.includes('/node_modules/')) return;
+
+      const nodeModIdx = normalized.lastIndexOf('/node_modules/');
+      if (nodeModIdx === -1) return;
+      const depPath = normalized.slice(nodeModIdx + '/node_modules/'.length);
+      const segments = depPath.split('/');
+      const pkgName = segments[0]?.startsWith('@') ? `${segments[0]}/${segments[1]}` : segments[0];
+      if (!pkgName) return;
+
+      const isRN =
+        pkgName === 'react-native' ||
+        pkgName.startsWith('@react-native/') ||
+        pkgName.includes('react-native') ||
+        rnSpecificExts.some((ext) => normalized.endsWith(ext));
+
+      if (!isRN) return;
+
+      const flowStripped = removeTypes(code, { all: true }).toString();
+      const result = esbuild.transformSync(flowStripped, { loader: 'jsx', sourcefile: id });
+      return { code: result.code, map: null };
     },
   };
 }
 
 export default defineConfig({
-  plugins: [react(), flowRemoveTypesPlugin()],
+  plugins: [react(), reactNativeDependencyTransformPlugin()],
   resolve: {
     extensions: [
       '.ios.js',
