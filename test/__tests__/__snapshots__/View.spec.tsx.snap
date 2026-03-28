@@ -2,6 +2,7 @@
 
 exports[`View Component > matches snapshot 1`] = `
 <View
+  accessible={false}
   ref={null}
   style={
     {

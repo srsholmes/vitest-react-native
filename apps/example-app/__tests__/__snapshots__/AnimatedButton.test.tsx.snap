@@ -8,6 +8,7 @@ exports[`AnimatedButton > matches snapshot 1`] = `
       "disabled": false,
     }
   }
+  accessible={true}
   disabled={false}
   onPress={[Function]}
   onPressIn={[Function]}

@@ -5,9 +5,12 @@ exports[`InputAccessoryView > matches snapshot 1`] = `
   nativeID="snapshot-accessory"
 >
   <View
+    accessible={false}
     ref={null}
   >
     <Button
+      accessibilityRole="button"
+      accessible={true}
       onPress={[Function]}
     >
       <Text
@@ -17,6 +20,8 @@ exports[`InputAccessoryView > matches snapshot 1`] = `
       </Text>
     </Button>
     <Button
+      accessibilityRole="button"
+      accessible={true}
       onPress={[Function]}
     >
       <Text

@@ -2,6 +2,7 @@
 
 exports[`TextInput Component > matches snapshot 1`] = `
 <View
+  accessible={false}
   ref={null}
 >
   <TextInput

@@ -9,6 +9,7 @@ exports[`Modal Component > matches snapshot when visible 1`] = `
   visible={true}
 >
   <View
+    accessible={false}
     ref={null}
     style={
       {
@@ -19,6 +20,7 @@ exports[`Modal Component > matches snapshot when visible 1`] = `
     }
   >
     <View
+      accessible={false}
       ref={null}
       style={
         {

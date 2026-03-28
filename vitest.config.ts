@@ -15,7 +15,8 @@ function flowRemoveTypesPlugin(): Plugin {
       const normalized = id.replace(/\\/g, '/');
       if (
         (normalized.includes('/node_modules/react-native/') ||
-          normalized.includes('/node_modules/@react-native/')) &&
+          normalized.includes('/node_modules/@react-native/') ||
+          normalized.includes('/node_modules/@react-native-community/')) &&
         (id.endsWith('.js') || id.endsWith('.ios.js'))
       ) {
         const result = removeTypes(code, { all: true }).toString();
@@ -54,10 +55,14 @@ export default defineConfig({
     ],
     globals: true,
     environment: 'node',
-    include: ['test/**/*.spec.{ts,tsx}', 'apps/**/__tests__/**/*.test.{ts,tsx}'],
+    include: [
+      'test/**/*.spec.{ts,tsx}',
+      'apps/**/__tests__/**/*.test.{ts,tsx}',
+      'apps/**/__parity-tests__/**/*.test.{ts,tsx}',
+    ],
     server: {
       deps: {
-        inline: ['react-native', /react-native/, /@react-native/],
+        inline: ['react-native', /react-native/, /@react-native/, /@react-native-community/],
       },
     },
   },

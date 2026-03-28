@@ -6,6 +6,7 @@ exports[`DrawerLayoutAndroid > matches snapshot 1`] = `
   drawerWidth={300}
 >
   <View
+    accessible={false}
     ref={null}
   >
     <Text

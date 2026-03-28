@@ -41,5 +41,8 @@ jobs:
       - name: Type check
         run: pnpm typecheck
 
-      - name: Test
+      - name: Test (Vitest)
         run: pnpm test:run
+
+      - name: Test (Jest parity)
+        run: pnpm test:jest

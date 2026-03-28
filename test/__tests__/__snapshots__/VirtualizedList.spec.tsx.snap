@@ -3,6 +3,7 @@
 exports[`VirtualizedList > matches snapshot 1`] = `
 <VirtualizedList>
   <View
+    accessible={false}
     ref={null}
   >
     <Text
@@ -12,6 +13,7 @@ exports[`VirtualizedList > matches snapshot 1`] = `
     </Text>
   </View>
   <View
+    accessible={false}
     ref={null}
   >
     <Text
@@ -21,6 +23,7 @@ exports[`VirtualizedList > matches snapshot 1`] = `
     </Text>
   </View>
   <View
+    accessible={false}
     ref={null}
   >
     <Text

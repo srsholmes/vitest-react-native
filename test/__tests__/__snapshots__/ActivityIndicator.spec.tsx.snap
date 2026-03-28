@@ -2,6 +2,7 @@
 
 exports[`ActivityIndicator Component > matches snapshot with all props 1`] = `
 <View
+  accessible={false}
   ref={null}
   style={
     {

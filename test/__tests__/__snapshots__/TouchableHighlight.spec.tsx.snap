@@ -2,9 +2,11 @@
 
 exports[`TouchableHighlight Component > matches snapshot 1`] = `
 <View
+  accessible={false}
   ref={null}
 >
   <TouchableHighlight
+    accessible={true}
     ref={null}
     style={
       {

@@ -2,9 +2,12 @@
 
 exports[`Button Component > matches snapshot 1`] = `
 <View
+  accessible={false}
   ref={null}
 >
   <Button
+    accessibilityRole="button"
+    accessible={true}
     onPress={[Function]}
     testID="snapshot-button"
   >
@@ -19,9 +22,12 @@ exports[`Button Component > matches snapshot 1`] = `
 
 exports[`Button Component > matches snapshot with disabled 1`] = `
 <View
+  accessible={false}
   ref={null}
 >
   <Button
+    accessibilityRole="button"
+    accessible={true}
     disabled={true}
     onPress={[Function]}
     testID="disabled-button"

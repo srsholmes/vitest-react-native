@@ -10,6 +10,7 @@ exports[`FlatList Component > matches snapshot 1`] = `
     </Text>
   </View>
   <View
+    accessible={false}
     ref={null}
     style={
       {
@@ -24,6 +25,7 @@ exports[`FlatList Component > matches snapshot 1`] = `
     </Text>
   </View>
   <View
+    accessible={false}
     ref={null}
     style={
       {
@@ -38,6 +40,7 @@ exports[`FlatList Component > matches snapshot 1`] = `
     </Text>
   </View>
   <View
+    accessible={false}
     ref={null}
     style={
       {

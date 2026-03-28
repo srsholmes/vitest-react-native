@@ -2,6 +2,7 @@
 
 exports[`Switch Component > matches snapshot with value false 1`] = `
 <View
+  accessible={false}
   ref={null}
 >
   <Switch
@@ -13,6 +14,7 @@ exports[`Switch Component > matches snapshot with value false 1`] = `
 
 exports[`Switch Component > matches snapshot with value true 1`] = `
 <View
+  accessible={false}
   ref={null}
 >
   <Switch

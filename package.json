@@ -6,6 +6,8 @@
   "scripts": {
     "test": "vitest",
     "test:run": "vitest run",
+    "test:jest": "pnpm --filter @vitest-react-native/example-app test:jest",
+    "test:parity": "pnpm test:jest && pnpm test:run -- apps/example-app/__parity-tests__/",
     "typecheck": "tsc --noEmit",
     "build": "pnpm -r build",
     "lint": "eslint .",

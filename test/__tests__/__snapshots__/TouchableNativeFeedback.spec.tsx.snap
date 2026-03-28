@@ -1,8 +1,11 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
 exports[`TouchableNativeFeedback > matches snapshot 1`] = `
-<TouchableNativeFeedback>
+<TouchableNativeFeedback
+  accessible={true}
+>
   <View
+    accessible={false}
     ref={null}
   >
     <Text

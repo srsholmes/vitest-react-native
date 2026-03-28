@@ -239,7 +239,9 @@ addHook((code, filename) => processReactNative(code, filename), {
   matcher: (id) => {
     const p = normalize(id);
     return (
-      (p.includes('/node_modules/react-native/') || p.includes('/node_modules/@react-native/')) &&
+      (p.includes('/node_modules/react-native/') ||
+        p.includes('/node_modules/@react-native/') ||
+        p.includes('/node_modules/@react-native-community/')) &&
       !p.includes('Renderer/implementations')
     );
   },
@@ -365,9 +367,8 @@ mock(
 // Platform
 mock(
   'react-native/Libraries/Utilities/Platform',
-  () => `{
-  __esModule: true,
-  default: {
+  () => `(() => {
+  const Platform = {
     OS: 'ios',
     Version: '17.0',
     isPad: false,
@@ -382,8 +383,9 @@ mock(
       if ('native' in obj) return obj.native;
       return obj.default;
     },
-  },
-}`
+  };
+  return { __esModule: true, default: Platform, ...Platform };
+})()`
 );
 
 // UIManager
@@ -575,7 +577,9 @@ mock(
   () => `(() => {
   const React = require('react');
   const View = React.forwardRef((props, ref) => {
-    return React.createElement('View', { ...props, ref }, props.children);
+    const accessible = props.accessible !== undefined ? props.accessible
+      : !!(props.accessibilityRole || props.accessibilityLabel || props.role || props.onPress);
+    return React.createElement('View', { ...props, accessible, ref }, props.children);
   });
   View.displayName = 'View';
   return { __esModule: true, default: View };
@@ -588,7 +592,9 @@ mock(
   () => `(() => {
   const React = require('react');
   const ViewNativeComponent = React.forwardRef((props, ref) => {
-    return React.createElement('View', { ...props, ref }, props.children);
+    const accessible = props.accessible !== undefined ? props.accessible
+      : !!(props.accessibilityRole || props.accessibilityLabel || props.role || props.onPress);
+    return React.createElement('View', { ...props, accessible, ref }, props.children);
   });
   ViewNativeComponent.displayName = 'View';
   return { __esModule: true, default: ViewNativeComponent };
@@ -728,9 +734,11 @@ mock(
     const { children, style, disabled, onPress, onPressIn, onPressOut, onLongPress, ...rest } = props;
     const resolvedStyle = typeof style === 'function' ? style({ pressed: false }) : style;
     const resolvedChildren = typeof children === 'function' ? children({ pressed: false }) : children;
+    const accessible = props.accessible !== undefined ? props.accessible : true;
 
     return React.createElement('Pressable', {
       ...rest,
+      accessible,
       style: resolvedStyle,
       ref,
       onPress: disabled ? undefined : onPress,
@@ -751,7 +759,8 @@ mock(
   () => `(() => {
   const React = require('react');
   const TouchableOpacity = React.forwardRef((props, ref) => {
-    return React.createElement('TouchableOpacity', { ...props, ref }, props.children);
+    const accessible = props.accessible !== undefined ? props.accessible : true;
+    return React.createElement('TouchableOpacity', { ...props, accessible, ref }, props.children);
   });
   TouchableOpacity.displayName = 'TouchableOpacity';
   return { __esModule: true, default: TouchableOpacity };
@@ -764,7 +773,8 @@ mock(
   () => `(() => {
   const React = require('react');
   const TouchableHighlight = React.forwardRef((props, ref) => {
-    return React.createElement('TouchableHighlight', { ...props, ref }, props.children);
+    const accessible = props.accessible !== undefined ? props.accessible : true;
+    return React.createElement('TouchableHighlight', { ...props, accessible, ref }, props.children);
   });
   TouchableHighlight.displayName = 'TouchableHighlight';
   return { __esModule: true, default: TouchableHighlight };
@@ -1275,8 +1285,14 @@ mock(
   () => `(() => {
   const React = require('react');
   const Text = require('react-native/Libraries/Text/Text').default;
-  function Button({ title, onPress, disabled, testID, color, accessibilityLabel }) {
-    return React.createElement('Button', { onPress, disabled, testID, color, accessibilityLabel },
+  function Button({ title, onPress, disabled, testID, color, accessibilityLabel, accessibilityRole, role, accessible, ...rest }) {
+    return React.createElement('Button', {
+      onPress, disabled, testID, color, accessibilityLabel,
+      accessibilityRole: accessibilityRole || 'button',
+      role: role,
+      accessible: accessible !== undefined ? accessible : true,
+      ...rest,
+    },
       React.createElement(Text, null, title)
     );
   }
@@ -1322,7 +1338,8 @@ mock(
   () => `(() => {
   const React = require('react');
   const TouchableWithoutFeedback = React.forwardRef((props, ref) => {
-    return React.createElement('TouchableWithoutFeedback', { ...props, ref }, props.children);
+    const accessible = props.accessible !== undefined ? props.accessible : true;
+    return React.createElement('TouchableWithoutFeedback', { ...props, accessible, ref }, props.children);
   });
   TouchableWithoutFeedback.displayName = 'TouchableWithoutFeedback';
   return { __esModule: true, default: TouchableWithoutFeedback };
@@ -1493,7 +1510,8 @@ mock(
   const React = require('react');
   class TouchableNativeFeedback extends React.Component {
     render() {
-      return React.createElement('TouchableNativeFeedback', this.props, this.props.children);
+      const accessible = this.props.accessible !== undefined ? this.props.accessible : true;
+      return React.createElement('TouchableNativeFeedback', { ...this.props, accessible }, this.props.children);
     }
   }
   TouchableNativeFeedback.displayName = 'TouchableNativeFeedback';

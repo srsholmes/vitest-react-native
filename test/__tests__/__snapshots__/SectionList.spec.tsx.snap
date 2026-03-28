@@ -2,6 +2,7 @@
 
 exports[`SectionList Component > matches snapshot 1`] = `
 <View
+  accessible={false}
   ref={null}
 >
   <SectionList>
