@@ -1,32 +1,21 @@
 import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vitest/config';
 import { resolve } from 'path';
-import { createRequire } from 'module';
 import type { Plugin } from 'vite';
+import { transformReactNativeDependency } from './packages/vitest-react-native/src/reactNativeDependencyTransform';
 
-const require = createRequire(import.meta.url);
-const removeTypes = require('flow-remove-types');
-
-function flowRemoveTypesPlugin(): Plugin {
+function reactNativeDependencyTransformPlugin(): Plugin {
   return {
-    name: 'flow-remove-types',
+    name: 'react-native-dependency-transform',
     enforce: 'pre',
     transform(code, id) {
-      const normalized = id.replace(/\\/g, '/');
-      if (
-        (normalized.includes('/node_modules/react-native/') ||
-          normalized.includes('/node_modules/@react-native/')) &&
-        (id.endsWith('.js') || id.endsWith('.ios.js'))
-      ) {
-        const result = removeTypes(code, { all: true }).toString();
-        return { code: result, map: null };
-      }
+      return transformReactNativeDependency(code, id);
     },
   };
 }
 
 export default defineConfig({
-  plugins: [react(), flowRemoveTypesPlugin()],
+  plugins: [react(), reactNativeDependencyTransformPlugin()],
   resolve: {
     extensions: [
       '.ios.js',
