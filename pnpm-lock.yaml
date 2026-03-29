@@ -7,10 +7,6 @@ settings:
 importers:
 
   .:
-    dependencies:
-      esbuild:
-        specifier: ^0.27.4
-        version: 0.27.4
     devDependencies:
       '@changesets/cli':
         specifier: ^2.29.8
@@ -160,9 +156,6 @@ importers:
       '@react-native/polyfills':
         specifier: ^2.0.0
         version: 2.0.0
-      esbuild:
-        specifier: ^0.27.4
-        version: 0.27.4
       flow-remove-types:
         specifier: ^2.257.1
         version: 2.298.0
@@ -182,6 +175,9 @@ importers:
       '@types/node':
         specifier: ^22.10.7
         version: 22.19.7
+      esbuild:
+        specifier: ^0.27.4
+        version: 0.27.4
       typescript:
         specifier: ^5.7.3
         version: 5.9.3

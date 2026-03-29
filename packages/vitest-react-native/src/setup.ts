@@ -101,13 +101,16 @@ g.performance = globalThis.performance || { now: Date.now };
 
 import { addHook } from 'pirates';
 import removeTypes from 'flow-remove-types';
-import * as esbuild from 'esbuild';
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
 import { createRequire } from 'module';
 
 const require = createRequire(import.meta.url);
+
+// Resolve esbuild through vite's dependencies (no direct dependency needed)
+const viteRequire = createRequire(require.resolve('vite'));
+const esbuild = viteRequire('esbuild') as typeof import('esbuild');
 
 // ============================================================================
 // STEP 3: Set up cache directory for transformed files
