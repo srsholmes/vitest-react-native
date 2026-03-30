@@ -32,6 +32,9 @@ jobs:
           cache: 'pnpm'
           registry-url: 'https://registry.npmjs.org'
 
+      - name: Upgrade npm for trusted publishing support
+        run: npm install -g npm@latest
+
       - name: Install dependencies
         run: pnpm install
 
@@ -50,15 +53,10 @@ jobs:
       - name: Publish to npm (trusted publishing)
         if: steps.changesets.outputs.hasChangesets == 'false'
         run: |
-          # Debug info
           echo "npm version: $(npm --version)"
-          echo "Node version: $(node --version)"
 
-          # Remove _authToken from .npmrc so npm uses OIDC instead
-          NPMRC="${NPM_CONFIG_USERCONFIG:-$HOME/.npmrc}"
-          echo "Cleaning auth token from $NPMRC"
-          sed -i '/_authToken/d' "$NPMRC"
-          cat "$NPMRC"
+          # Remove _authToken so npm uses OIDC instead of a token
+          sed -i '/_authToken/d' "${NPM_CONFIG_USERCONFIG:-$HOME/.npmrc}"
 
           cd packages/vitest-react-native
           CURRENT=$(node -p "require('./package.json').version")
