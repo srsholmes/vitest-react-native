@@ -30,6 +30,7 @@ jobs:
         with:
           node-version: 22
           cache: 'pnpm'
+          registry-url: 'https://registry.npmjs.org'
 
       - name: Install dependencies
         run: pnpm install
@@ -46,9 +47,19 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Publish to npm
+      - name: Publish to npm (trusted publishing)
         if: steps.changesets.outputs.hasChangesets == 'false'
         run: |
+          # Debug info
+          echo "npm version: $(npm --version)"
+          echo "Node version: $(node --version)"
+
+          # Remove _authToken from .npmrc so npm uses OIDC instead
+          NPMRC="${NPM_CONFIG_USERCONFIG:-$HOME/.npmrc}"
+          echo "Cleaning auth token from $NPMRC"
+          sed -i '/_authToken/d' "$NPMRC"
+          cat "$NPMRC"
+
           cd packages/vitest-react-native
           CURRENT=$(node -p "require('./package.json').version")
           PUBLISHED=$(npm view @srsholmes/vitest-react-native version 2>/dev/null || echo "0.0.0")
