@@ -21,25 +21,6 @@
 // This eliminates the whack-a-mole pattern where each RN update adds a new
 // module/method/flag that crashes until setup.ts is manually updated.
 const createTurboModuleProxy = () => {
-  // Creates a "safe" mock object where any property access returns a no-op
-  // function, and common patterns like getConstants() return empty objects.
-  const createNativeModuleMock = () =>
-    new Proxy(
-      {},
-      {
-        get: (_target, prop) => {
-          if (typeof prop !== 'string') return undefined;
-          // getConstants/getDefaultEventTypes are called at module init and
-          // must return the right shape — object and array respectively.
-          if (prop === 'getConstants' || prop === 'getConstantsForViewManager')
-            return () => ({});
-          if (prop === 'getDefaultEventTypes') return () => [];
-          // Everything else: return a no-op function
-          return () => {};
-        },
-      },
-    );
-
   return (name: string) => {
     if (name === 'NativeReactNativeFeatureFlagsCxx') {
       // Feature flags: any prop returns () => false
@@ -51,8 +32,10 @@ const createTurboModuleProxy = () => {
         },
       );
     }
-    // All other TurboModules: return a generic safe mock
-    return createNativeModuleMock();
+    // Return null for other native modules so TurboModuleRegistry.get()
+    // returns null and RN code uses JS fallbacks instead of broken native stubs.
+    // TurboModuleRegistry.getEnforcing() handles the null → safe mock fallback.
+    return null;
   };
 };
 
@@ -296,10 +279,17 @@ mock(
   get: (name) => global.__turboModuleProxy ? global.__turboModuleProxy(name) : null,
   getEnforcing: (name) => {
     const module = global.__turboModuleProxy ? global.__turboModuleProxy(name) : null;
-    if (!module) {
-      return {}; // Return empty object instead of throwing
-    }
-    return module;
+    if (module) return module;
+    // Return a safe Proxy mock instead of {} so any method call
+    // (like getConstants()) is a no-op rather than a crash
+    return new Proxy({}, {
+      get: (_, prop) => {
+        if (typeof prop !== 'string') return undefined;
+        if (prop === 'getConstants' || prop === 'getConstantsForViewManager') return () => ({});
+        if (prop === 'getDefaultEventTypes') return () => [];
+        return () => {};
+      },
+    });
   },
 }`
 );
