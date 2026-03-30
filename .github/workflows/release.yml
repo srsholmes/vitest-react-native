@@ -37,13 +37,24 @@ jobs:
       - name: Build
         run: pnpm build
 
-      - name: Create Release Pull Request or Publish
+      - name: Create Release Pull Request or detect publish
         id: changesets
         uses: changesets/action@v1
         with:
-          publish: pnpm release
           title: 'chore: version packages'
           commit: 'chore: version packages'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NPM_CONFIG_PROVENANCE: true
+
+      - name: Publish to npm
+        if: steps.changesets.outputs.hasChangesets == 'false'
+        run: |
+          cd packages/vitest-react-native
+          CURRENT=$(node -p "require('./package.json').version")
+          PUBLISHED=$(npm view @srsholmes/vitest-react-native version 2>/dev/null || echo "0.0.0")
+          if [ "$CURRENT" != "$PUBLISHED" ]; then
+            echo "Publishing @srsholmes/vitest-react-native@$CURRENT"
+            npm publish --provenance --access public
+          else
+            echo "Version $CURRENT already published, skipping"
+          fi
