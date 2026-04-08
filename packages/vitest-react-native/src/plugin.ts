@@ -3,11 +3,27 @@ import { fileURLToPath } from 'url';
 import { createRequire } from 'module';
 import { existsSync } from 'fs';
 import type { Plugin, UserConfig } from 'vite';
-import * as esbuild from 'esbuild';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const require = createRequire(import.meta.url);
 const removeTypes = require('flow-remove-types');
+
+// Lazily resolved rolldown transform (ships with Vite 8+)
+type TransformSyncFn = (filename: string, code: string, options?: { lang?: string }) => { code: string };
+let _transformSync: TransformSyncFn | null = null;
+let _transformSyncLoading: Promise<void> | null = null;
+const ensureTransformSync = async (): Promise<void> => {
+  if (_transformSync) return;
+  if (!_transformSyncLoading) {
+    _transformSyncLoading = (async () => {
+      const viteRequire = createRequire(require.resolve('vite'));
+      const rolldownPath = viteRequire.resolve('rolldown/utils');
+      const mod = await import(rolldownPath);
+      _transformSync = mod.transformSync;
+    })();
+  }
+  await _transformSyncLoading;
+};
 
 export interface VitestReactNativePluginOptions {
   /**
@@ -56,6 +72,9 @@ export function reactNative(options: VitestReactNativePluginOptions = {}): Plugi
   return {
     name: 'vitest-plugin-react-native',
     enforce: 'pre',
+    async buildStart() {
+      await ensureTransformSync();
+    },
     config(): UserConfig {
       return {
         resolve: {
@@ -128,10 +147,7 @@ export function reactNative(options: VitestReactNativePluginOptions = {}): Plugi
 
       // Strip Flow types then transform JSX
       const flowStripped = removeTypes(code, { all: true }).toString();
-      const result = esbuild.transformSync(flowStripped, {
-        loader: 'jsx',
-        sourcefile: id,
-      });
+      const result = _transformSync!(id, flowStripped, { lang: 'jsx' });
       return { code: result.code, map: null };
     },
   };

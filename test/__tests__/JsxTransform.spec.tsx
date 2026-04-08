@@ -28,6 +28,11 @@ describe('JSX transform for third-party packages (issue #4)', () => {
       transformPackages: ['react-native-modal-datetime-picker'],
     });
 
+    // Initialize rolldown (normally done by Vite via buildStart)
+    if (plugin.buildStart) {
+      await (plugin.buildStart as (...args: any[]) => any).call({});
+    }
+
     const jsxCode = `
       import React from 'react';
       export default function Picker() {

@@ -3,10 +3,14 @@ import { defineConfig } from 'vitest/config';
 import { resolve } from 'path';
 import { createRequire } from 'module';
 import type { Plugin } from 'vite';
-import * as esbuild from 'esbuild';
 
 const require = createRequire(import.meta.url);
 const removeTypes = require('flow-remove-types');
+
+// Resolve rolldown through vite's dependencies (pnpm nests it)
+const viteRequire = createRequire(require.resolve('vite'));
+const rolldownPath = viteRequire.resolve('rolldown/utils');
+const { transformSync } = await import(rolldownPath) as { transformSync: (filename: string, code: string, options?: { lang?: string }) => { code: string } };
 
 function reactNativeDependencyTransformPlugin(): Plugin {
   const rnSpecificExts = ['.ios.js', '.ios.jsx', '.android.js', '.android.jsx', '.native.js', '.native.jsx'];
@@ -36,7 +40,7 @@ function reactNativeDependencyTransformPlugin(): Plugin {
       if (!isRN) return;
 
       const flowStripped = removeTypes(code, { all: true }).toString();
-      const result = esbuild.transformSync(flowStripped, { loader: 'jsx', sourcefile: id });
+      const result = transformSync(id, flowStripped, { lang: 'jsx' });
       return { code: result.code, map: null };
     },
   };
