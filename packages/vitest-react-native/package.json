@@ -1,6 +1,6 @@
 {
   "name": "@srsholmes/vitest-react-native",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "Support for running React Native inside Vitest",
   "type": "module",
   "main": "./dist/plugin.cjs",
