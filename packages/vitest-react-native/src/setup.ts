@@ -67,10 +67,13 @@ g.performance = globalThis.performance || { now: Date.now };
 import { addHook } from 'pirates';
 import removeTypes from 'flow-remove-types';
 import * as esbuild from 'esbuild';
+import crypto from 'node:crypto';
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
 import { createRequire } from 'module';
+import { fileURLToPath } from 'node:url';
+import { readFromCache, writeToCache } from './cache.js';
 
 const require = createRequire(import.meta.url);
 
@@ -78,26 +81,48 @@ const require = createRequire(import.meta.url);
 // STEP 3: Set up cache directory for transformed files
 // ============================================================================
 
-let reactNativeVersion = '0.83.0';
-let pluginVersion = '0.2.0';
+let reactNativeVersion = 'unknown';
+let pluginVersion = 'unknown';
 
 try {
   const reactNativePkg = require('react-native/package.json');
   reactNativeVersion = reactNativePkg.version;
 } catch {
-  // Use default version
+  // Keep "unknown" fallback — only affects the cache dir name.
 }
 
 try {
-  const pluginPkg = require('./package.json');
+  // setup.ts lives at <pkg>/src/setup.ts in development and at <pkg>/dist/setup.{js,cjs}
+  // when installed. Both are exactly one directory below the package root, so walking
+  // up once and reading package.json works in both contexts.
+  const here = path.dirname(fileURLToPath(import.meta.url));
+  const pluginPkg = JSON.parse(
+    fs.readFileSync(path.join(here, '..', 'package.json'), 'utf-8'),
+  );
   pluginVersion = pluginPkg.version;
 } catch {
-  // Use default version
+  // Keep "unknown" fallback — only affects the cache dir name.
+}
+
+// Hash this file's bytes into the cache key so any edit to setup.ts (e.g. adding
+// a new mock) invalidates the cache automatically — no destructive end-of-file
+// wipe needed, which removes a major race window when many workers run in
+// parallel.
+let setupHash = 'nohash';
+try {
+  const bundlePath = fileURLToPath(import.meta.url);
+  setupHash = crypto
+    .createHash('sha1')
+    .update(fs.readFileSync(bundlePath))
+    .digest('hex')
+    .slice(0, 12);
+} catch {
+  // keep nohash fallback
 }
 
 const tmpDir = os.tmpdir();
 const cacheDirBase = path.join(tmpDir, 'vrn');
-const version = `${reactNativeVersion}_${pluginVersion}`;
+const version = `${reactNativeVersion}_${pluginVersion}_${setupHash}`;
 const cacheDir = path.join(cacheDirBase, version);
 
 if (!fs.existsSync(cacheDir)) {
@@ -151,10 +176,6 @@ const transformCode = (code: string): string => {
 
 const normalize = (p: string): string => p.replace(/\\/g, '/');
 
-const cacheExists = (cachePath: string): boolean => fs.existsSync(cachePath);
-const readFromCache = (cachePath: string): string => fs.readFileSync(cachePath, 'utf-8');
-const writeToCache = (cachePath: string, code: string): void => fs.writeFileSync(cachePath, code);
-
 // Process binary files (images) as base64
 addHook(
   (code) => {
@@ -175,9 +196,8 @@ const processReactNative = (code: string, filename: string): string => {
   const cacheName = normalize(path.relative(root, filename)).replace(/\//g, '_');
   const cachePath = path.join(cacheDir, cacheName);
 
-  if (cacheExists(cachePath)) {
-    return readFromCache(cachePath);
-  }
+  const cached = readFromCache(cachePath);
+  if (cached !== null) return cached;
 
   const mock = getMocked(filename);
   if (mock) {
@@ -1792,25 +1812,7 @@ mock(
 );
 
 // ============================================================================
-// STEP 9: Clear cache to ensure fresh mocks are used
-// ============================================================================
-
-// Clear the cache directory to force re-transformation with new mocks
-try {
-  const files = fs.readdirSync(cacheDir);
-  files.forEach((file) => {
-    try {
-      fs.unlinkSync(path.join(cacheDir, file));
-    } catch {
-      /* ignore */
-    }
-  });
-} catch {
-  /* ignore */
-}
-
-// ============================================================================
-// STEP 10: Configure React Native Testing Library
+// STEP 9: Configure React Native Testing Library
 // ============================================================================
 
 // Configure RNTL to recognize our mocked host components
