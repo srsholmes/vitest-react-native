@@ -1,9 +1,16 @@
 import React from 'react';
 import { test, expect, describe, vi } from 'vitest';
 import { render, fireEvent } from '@testing-library/react-native';
-import { ImageBackground, Text, View } from 'react-native';
+import { Image, ImageBackground, Text, View } from 'react-native';
 
 describe('ImageBackground Component', () => {
+  // https://github.com/srsholmes/vitest-react-native/issues/31
+  test('is the ImageBackground mock, not the Image mock', () => {
+    expect(ImageBackground).not.toBe(Image);
+    const { toJSON } = render(<ImageBackground source={{ uri: 'https://example.com/a.png' }} />);
+    expect(toJSON()).toMatchObject({ type: 'ImageBackground' });
+  });
+
   test('renders children correctly', () => {
     const { getByText } = render(
       <ImageBackground source={{ uri: 'https://example.com/image.png' }}>

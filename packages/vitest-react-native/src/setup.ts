@@ -74,6 +74,7 @@ import path from 'path';
 import { createRequire } from 'module';
 import { fileURLToPath } from 'node:url';
 import { readFromCache, writeToCache } from './cache.js';
+import { findMock, type MockEntry } from './mocks.js';
 
 const require = createRequire(import.meta.url);
 
@@ -151,15 +152,9 @@ const root = process.cwd();
 // STEP 4: Mock registry - stores module path to mock code mappings
 // ============================================================================
 
-interface MockEntry {
-  path: string;
-  code: string;
-}
-
 const mocked: MockEntry[] = [];
 
-const getMocked = (filePath: string): MockEntry | undefined =>
-  mocked.find((entry) => filePath.includes(entry.path));
+const getMocked = (filePath: string): MockEntry | undefined => findMock(mocked, filePath);
 
 // ============================================================================
 // STEP 5: Code transformation utilities
