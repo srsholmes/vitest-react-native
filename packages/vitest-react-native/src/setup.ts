@@ -711,7 +711,13 @@ mock(
     return React.createElement('View', { ...props, accessible, ref }, props.children);
   });
   ViewNativeComponent.displayName = 'View';
-  return { __esModule: true, default: ViewNativeComponent };
+  const Commands = {
+    focus: () => {},
+    blur: () => {},
+    hotspotUpdate: () => {},
+    setPressed: () => {},
+  };
+  return { __esModule: true, default: ViewNativeComponent, Commands };
 })()`
 );
 

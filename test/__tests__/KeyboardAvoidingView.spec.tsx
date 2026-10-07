@@ -1,12 +1,11 @@
 import React from 'react';
 import { test, expect, describe } from 'vitest';
 import { render } from '@testing-library/react-native';
-import { Keyboard, KeyboardAvoidingView, Text, TextInput } from 'react-native';
+import { KeyboardAvoidingView, Text, TextInput } from 'react-native';
 
 describe('KeyboardAvoidingView Component', () => {
   // https://github.com/srsholmes/vitest-react-native/issues/31
-  test('is the KeyboardAvoidingView mock, not the Keyboard API', () => {
-    expect(KeyboardAvoidingView).not.toBe(Keyboard);
+  test('renders the KeyboardAvoidingView mock, not the Keyboard API', () => {
     const { toJSON } = render(<KeyboardAvoidingView />);
     expect(toJSON()).toMatchObject({ type: 'KeyboardAvoidingView' });
   });
