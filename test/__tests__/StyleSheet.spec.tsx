@@ -62,13 +62,11 @@ describe('StyleSheet', () => {
     expect(StyleSheet.absoluteFill.position).toBe('absolute');
   });
 
-  test('absoluteFillObject is defined', () => {
-    expect(StyleSheet.absoluteFillObject).toBeDefined();
-    expect(StyleSheet.absoluteFillObject.position).toBe('absolute');
-    expect(StyleSheet.absoluteFillObject.left).toBe(0);
-    expect(StyleSheet.absoluteFillObject.right).toBe(0);
-    expect(StyleSheet.absoluteFillObject.top).toBe(0);
-    expect(StyleSheet.absoluteFillObject.bottom).toBe(0);
+  // Removed in RN 0.85, the oldest supported version.
+  test('absoluteFillObject is not provided', () => {
+    expect((StyleSheet as typeof StyleSheet & Record<string, unknown>).absoluteFillObject).toBe(
+      undefined
+    );
   });
 
   test('hairlineWidth is defined', () => {

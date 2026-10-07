@@ -31,7 +31,7 @@ describe('DrawerLayoutAndroid', () => {
   });
 
   test('has openDrawer method', () => {
-    let drawerRef: DrawerLayoutAndroid | null = null;
+    let drawerRef: React.ComponentRef<typeof DrawerLayoutAndroid> | null = null;
 
     render(
       <DrawerLayoutAndroid
@@ -59,7 +59,7 @@ describe('DrawerLayoutAndroid', () => {
   });
 
   test('has closeDrawer method', () => {
-    let drawerRef: DrawerLayoutAndroid | null = null;
+    let drawerRef: React.ComponentRef<typeof DrawerLayoutAndroid> | null = null;
 
     render(
       <DrawerLayoutAndroid

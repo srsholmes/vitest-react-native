@@ -1,7 +1,24 @@
 import { test, expect, describe, vi, beforeEach } from 'vitest';
-import { InteractionManager } from 'react-native';
+import * as ReactNative from 'react-native';
+import { rnMinor } from '../src/rnVersion';
 
-describe('InteractionManager', () => {
+// Not in RN 0.87's types; accessed lazily so the >= 0.87 throw is testable.
+const InteractionManager: any = new Proxy(
+  {},
+  { get: (_, prop) => (ReactNative as any).InteractionManager[prop] }
+);
+
+// RN 0.87 removed InteractionManager: in __DEV__ the export is a getter that
+// throws. The mock is only reachable on older versions.
+describe.runIf(rnMinor >= 87)('InteractionManager (RN >= 0.87)', () => {
+  test('throws the same removal error as React Native', () => {
+    expect(() => (ReactNative as any).InteractionManager).toThrow(
+      /InteractionManager has been removed/
+    );
+  });
+});
+
+describe.runIf(rnMinor < 87)('InteractionManager', () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });

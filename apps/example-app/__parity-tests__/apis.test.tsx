@@ -223,7 +223,16 @@ describe('LayoutAnimation', () => {
 // ---------------------------------------------------------------------------
 // InteractionManager
 // ---------------------------------------------------------------------------
-describe('InteractionManager', () => {
+// RN 0.87 removed InteractionManager: in __DEV__ the export is a getter that throws.
+const [, rnMinor] = require('react-native/package.json').version.split('.').map(Number);
+
+(rnMinor >= 87 ? describe : describe.skip)('InteractionManager (RN >= 0.87)', () => {
+  test('throws the removal error', () => {
+    expect(() => InteractionManager).toThrow(/InteractionManager has been removed/);
+  });
+});
+
+(rnMinor < 87 ? describe : describe.skip)('InteractionManager', () => {
   test('runAfterInteractions accepts function', () => {
     const task = fn();
     const result = InteractionManager.runAfterInteractions(task);

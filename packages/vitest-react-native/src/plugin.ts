@@ -4,6 +4,7 @@ import { createRequire } from 'module';
 import { existsSync } from 'fs';
 import type { Plugin, UserConfig } from 'vite';
 import * as esbuild from 'esbuild';
+import { resolveReactNativeDeepImport, splitBareSpecifier, isReactNativePackage } from './resolve.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const require = createRequire(import.meta.url);
@@ -30,6 +31,23 @@ export interface VitestReactNativePluginOptions {
  * Configures Vite to properly resolve React Native modules and sets up
  * the test environment for running React Native components in Vitest.
  */
+// dist/setup.js when installed; src/setup.ts when running from source.
+const setupFile = existsSync(resolve(__dirname, 'setup.js'))
+  ? resolve(__dirname, 'setup.js')
+  : resolve(__dirname, 'setup.ts');
+
+/**
+ * Put the plugin's setup file first, dropping any other reference to it
+ * (e.g. a manually listed `@srsholmes/vitest-react-native/setup`) so it only
+ * runs once.
+ */
+export function withSetupFirst(own: string, user: string | string[] | undefined): string[] {
+  const userFiles = user === undefined ? [] : Array.isArray(user) ? user : [user];
+  const isOwn = (f: string) =>
+    f === own || /(^|[\\/])vitest-react-native[\\/](setup|dist[\\/]setup(\.c?js)?)$/.test(f);
+  return [own, ...userFiles.filter((f) => !isOwn(f))];
+}
+
 export function reactNative(options: VitestReactNativePluginOptions = {}): Plugin {
   const { additionalExtensions = [], transformPackages = [] } = options;
 
@@ -56,14 +74,19 @@ export function reactNative(options: VitestReactNativePluginOptions = {}): Plugi
   return {
     name: 'vitest-plugin-react-native',
     enforce: 'pre',
-    config(): UserConfig {
+    config(config): UserConfig {
+      // The setup file must run before any user setup file: those commonly
+      // require('react-native') or mock RN libraries, which needs the globals
+      // and mocks in place. Vite would append a returned setupFiles after the
+      // user's, so prepend it on the user config directly.
+      const test = ((config as { test?: { setupFiles?: string | string[] } }).test ??= {});
+      test.setupFiles = withSetupFirst(setupFile, test.setupFiles);
       return {
         resolve: {
           extensions,
           conditions: ['react-native'],
         },
         test: {
-          setupFiles: [resolve(__dirname, 'setup.js')],
           globals: true,
           server: {
             deps: {
@@ -76,8 +99,24 @@ export function reactNative(options: VitestReactNativePluginOptions = {}): Plugi
     // Resolve extensionless imports from node_modules packages that ship
     // TypeScript source (e.g., @d11/react-native-fast-image).
     // Node's require() doesn't try .ts/.tsx extensions, so these fail at runtime.
-    resolveId(source, importer) {
-      if (!importer || !source.startsWith('.') || !importer.includes('node_modules')) return;
+    async resolveId(source, importer, resolveOptions) {
+      if (!importer) return;
+
+      // RN 0.87's "exports" map blocks deep imports like
+      // `react-native/src/private/…`. Metro falls back to file resolution;
+      // mirror that for RN packages once Vite's own resolver has given up.
+      const spec = splitBareSpecifier(source);
+      if (spec && isReactNativePackage(spec.pkg)) {
+        let resolved: { id: string } | null = null;
+        try {
+          resolved = await this.resolve(source, importer, { ...resolveOptions, skipSelf: true });
+        } catch {
+          // Vite throws for subpaths not listed in "exports"
+        }
+        return resolved ?? resolveReactNativeDeepImport(source, dirname(importer), extensions) ?? undefined;
+      }
+
+      if (!source.startsWith('.') || !importer.includes('node_modules')) return;
       // Skip if source already has a file extension
       const lastSegment = source.split('/').pop() || '';
       if (lastSegment.includes('.')) return;

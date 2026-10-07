@@ -1,8 +1,9 @@
 import { test, expect, describe } from 'vitest';
-import { Platform, PlatformIOSStatic } from 'react-native';
+import { Platform } from 'react-native';
 
-// Cast to iOS platform type for iOS-specific tests
-const iOSPlatform = Platform as PlatformIOSStatic;
+// Cast to iOS platform type for iOS-specific tests (RN 0.87's types no longer
+// export PlatformIOSStatic).
+const iOSPlatform = Platform as typeof Platform & { isPad: boolean };
 
 describe('Platform', () => {
   test('OS is defined', () => {

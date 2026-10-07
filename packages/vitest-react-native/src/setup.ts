@@ -80,8 +80,12 @@ import {
   writeToCache,
 } from './cache.js';
 import { findMock, type MockEntry } from './mocks.js';
+import { installExportsFallback } from './resolve.js';
+import { isRNBefore, parseRNVersion } from './version.js';
 
 const require = createRequire(import.meta.url);
+
+installExportsFallback();
 
 // ============================================================================
 // STEP 3: Set up cache directory for transformed files
@@ -90,12 +94,23 @@ const require = createRequire(import.meta.url);
 let reactNativeVersion = 'unknown';
 let pluginVersion = 'unknown';
 
-try {
-  const reactNativePkg = require('react-native/package.json');
-  reactNativeVersion = reactNativePkg.version;
-} catch {
-  // Keep "unknown" fallback — only affects the cache dir name.
+// Resolve react-native from the project, which is the copy tests load — not
+// from the plugin's own location, where pnpm may install a different peer.
+for (const from of [path.join(process.cwd(), 'noop.js'), import.meta.url]) {
+  try {
+    reactNativeVersion = createRequire(from)('react-native/package.json').version;
+    break;
+  } catch {
+    // Try the next location; "unknown" only affects the cache dir name.
+  }
 }
+
+// Installed RN version, used to mirror APIs React Native has removed.
+const rnVersion = parseRNVersion(reactNativeVersion);
+const rnBefore = (major: number, minor: number): boolean => isRNBefore(rnVersion, major, minor);
+const rnVersionLiteral = rnVersion
+  ? `{ major: ${rnVersion.major}, minor: ${rnVersion.minor}, patch: ${rnVersion.patch} }`
+  : '{ major: 0, minor: 0, patch: 0 }';
 
 try {
   // setup.ts lives at <pkg>/src/setup.ts in development and at <pkg>/dist/setup.{js,cjs}
@@ -313,15 +328,20 @@ mock(
 }`
 );
 
-// Feature Flags - explicit defaults for every known flag (RN 0.83) so named
-// imports / Object.keys / spreads see the full surface. Proxy fallback covers
-// flags added in future RN releases without needing a setup.ts update.
+// Feature Flags - explicit defaults for every known flag (RN 0.83–0.87, flags
+// removed upstream are kept for older versions) so named imports, Object.keys,
+// spreads and `import * as` see the full surface. `import * as` goes through
+// esbuild's ESM interop, which copies own properties only, so the Proxy
+// fallback below does NOT help RN internals — new flags must be listed here.
 mock(
   'react-native/src/private/featureflags/ReactNativeFeatureFlags',
   () => `(() => {
   const f = (v) => () => v;
   const defaults = {
+    animatedDeferStartOfTimingAnimations: f(false),
+    animatedForceNativeDriver: f(false),
     animatedShouldDebounceQueueFlush: f(false),
+    animatedShouldSyncValueBeforeStartCallback: f(true),
     animatedShouldUseSingleOp: f(false),
     cdpInteractionMetricsEnabled: f(false),
     commonTestFlag: f(false),
@@ -329,15 +349,20 @@ mock(
     configurePressabilityDuringInsertion: f(false),
     cxxNativeAnimatedEnabled: f(false),
     cxxNativeAnimatedRemoveJsSync: f(false),
+    defaultTextToOverflowHidden: f(true),
     deferFlatListFocusChangeRenderUpdate: f(false),
     disableEarlyViewCommandExecution: f(false),
     disableFabricCommitInCXXAnimated: f(false),
+    disableImageViewPreallocationAndroid: f(false),
     disableMaintainVisibleContentPosition: f(false),
     disableMountItemReorderingAndroid: f(false),
     disableOldAndroidAttachmentMetricsWorkarounds: f(true),
+    disableSubviewClippingAndroid: f(false),
     disableTextLayoutManagerCacheAndroid: f(false),
+    disableViewPreallocationAndroid: f(false),
     enableAccessibilityOrder: f(false),
     enableAccumulatedUpdatesInRawPropsAndroid: f(false),
+    enableAndroidFontWeightAdjustment: f(true),
     enableAndroidLinearText: f(false),
     enableAndroidTextMeasurementOptimizations: f(false),
     enableBridgelessArchitecture: f(false),
@@ -347,15 +372,20 @@ mock(
     enableDoubleMeasurementFixAndroid: f(false),
     enableEagerMainQueueModulesOnIOS: f(false),
     enableEagerRootViewAttachment: f(false),
+    enableExclusivePropsUpdateAndroid: f(false),
+    enableFabricCommitBranching: f(false),
     enableFabricLogs: f(false),
     enableFabricRenderer: f(false),
+    enableFlexboxAutoMinSizeInStrictMode: f(false),
     enableFontScaleChangesUpdatingLayout: f(true),
     enableImagePrefetchingAndroid: f(false),
     enableImagePrefetchingOnUiThreadAndroid: f(false),
     enableImmediateUpdateModeForContentOffsetChanges: f(false),
+    enableImperativeEvents: f(false),
     enableImperativeFocus: f(false),
     enableInteropViewManagerClassLookUpOptimizationIOS: f(false),
     enableIntersectionObserverByDefault: f(false),
+    enableIOSCompressedTextFrameAdjustment: f(false),
     enableIOSTextBaselineOffsetPerLine: f(false),
     enableIOSViewClipToPaddingBox: f(false),
     enableKeyEvents: f(false),
@@ -363,11 +393,15 @@ mock(
     enableLayoutAnimationsOnIOS: f(true),
     enableMainQueueCoordinatorOnIOS: f(false),
     enableModuleArgumentNSNullConversionIOS: f(false),
+    enableMutationObserverByDefault: f(false),
     enableNativeCSSParsing: f(false),
+    enableNativeEventTargetEventDispatching: f(false),
     enableNetworkEventReporting: f(true),
     enablePreparedTextLayout: f(false),
     enablePropsUpdateReconciliationAndroid: f(false),
     enableResourceTimingAPI: f(true),
+    enableRuntimeSchedulerQueueClearingOnError: f(false),
+    enableSchedulerDelegateInvalidation: f(false),
     enableSwiftUIBasedFilters: f(false),
     enableViewCulling: f(false),
     enableViewRecycling: f(false),
@@ -382,19 +416,27 @@ mock(
     enableVirtualViewRenderState: f(true),
     enableVirtualViewWindowFocusDetection: f(false),
     enableWebPerformanceAPIsByDefault: f(true),
+    externalElementInspectionEnabled: f(true),
+    fixDifferentiatorParentTagForUnflattenCase: f(true),
     fixMappingOfEventPrioritiesBetweenFabricAndReact: f(false),
     fixVirtualizeListCollapseWindowSize: f(false),
+    fixYogaFlexBasisFitContentInMainAxis: f(false),
     fuseboxAssertSingleHostState: f(true),
     fuseboxEnabledRelease: f(false),
+    fuseboxFrameRecordingEnabled: f(false),
     fuseboxNetworkInspectionEnabled: f(true),
+    fuseboxScreenshotCaptureEnabled: f(false),
     hideOffscreenVirtualViewsOnIOS: f(false),
     isLayoutAnimationEnabled: f(true),
     jsOnlyTestFlag: f(false),
-    overrideBySynchronousMountPropsAtMountingAndroid: f(false),
+    optimizedAnimatedPropUpdates: f(false),
+    overrideBySynchronousMountPropsAtMountingAndroid: f(true),
     perfIssuesEnabled: f(false),
     perfMonitorV2Enabled: f(false),
     preparedTextCacheSize: f(200),
     preventShadowTreeCommitExhaustion: f(false),
+    redBoxV2Android: f(false),
+    redBoxV2IOS: f(false),
     reduceDefaultPropsInImage: f(false),
     reduceDefaultPropsInText: f(false),
     shouldPressibilityUseW3CPointerEventsForHover: f(false),
@@ -404,13 +446,16 @@ mock(
     shouldUseSetNativePropsInFabric: f(true),
     skipActivityIdentityAssertionOnHostPause: f(false),
     sweepActiveTouchOnChildNativeGesturesAndroid: f(true),
+    syncAndroidClipBoundsWithOverflow: f(false),
     traceTurboModulePromiseRejectionsOnAndroid: f(false),
     updateRuntimeShadowNodeReferencesOnCommit: f(false),
+    updateRuntimeShadowNodeReferencesOnCommitThread: f(false),
     useAlwaysAvailableJSErrorHandling: f(false),
     useFabricInterop: f(true),
     useNativeEqualsInNativeReadableArrayAndroid: f(true),
     useNativeTransformHelperAndroid: f(true),
     useNativeViewConfigsInBridgelessMode: f(false),
+    useNestedScrollViewAndroid: f(false),
     useOptimizedEventBatchingOnAndroid: f(false),
     useRawPropsJsiValue: f(true),
     useShadowNodeStateOnClone: f(false),
@@ -419,6 +464,8 @@ mock(
     useTurboModuleInterop: f(false),
     useTurboModules: f(false),
     viewCullingOutsetRatio: f(0),
+    viewTransitionEnabled: f(false),
+    viewTransitionUseHardwareBitmapAndroid: f(false),
     virtualViewActivityBehavior: f("no-activity"),
     virtualViewHysteresisRatio: f(0),
     virtualViewPrerenderRatio: f(5),
@@ -466,7 +513,6 @@ mock(
     },
     compose: (style1, style2) => [style1, style2],
     absoluteFill: { position: 'absolute', left: 0, right: 0, top: 0, bottom: 0 },
-    absoluteFillObject: { position: 'absolute', left: 0, right: 0, top: 0, bottom: 0 },
     hairlineWidth: 0.5,
     setStyleAttributePreprocessor: () => {},
   };
@@ -486,7 +532,7 @@ mock(
     isTV: false,
     isVision: false,
     constants: {
-      reactNativeVersion: { major: 0, minor: 83, patch: 0 },
+      reactNativeVersion: ${rnVersionLiteral},
     },
     select: (obj) => {
       if ('ios' in obj) return obj.ios;
@@ -596,7 +642,7 @@ mock(
     },
     Networking: { sendRequest: vi.fn(), abortRequest: vi.fn(), addListener: vi.fn(), removeListeners: vi.fn() },
     PlatformConstants: {
-      getConstants: () => ({ isTesting: true, reactNativeVersion: { major: 0, minor: 83, patch: 0 } }),
+      getConstants: () => ({ isTesting: true, reactNativeVersion: ${rnVersionLiteral} }),
     },
     SourceCode: { getConstants: () => ({ scriptURL: null }) },
     StatusBarManager: {
@@ -902,10 +948,11 @@ mock(
   class StatusBar extends React.Component {
     static currentHeight = 42;
     static setBarStyle = vi.fn();
-    static setBackgroundColor = vi.fn();
     static setHidden = vi.fn();
+    // Removed in RN 0.87.
+    ${rnBefore(0, 87) ? `static setBackgroundColor = vi.fn();
     static setNetworkActivityIndicatorVisible = vi.fn();
-    static setTranslucent = vi.fn();
+    static setTranslucent = vi.fn();` : ''}
     static pushStackEntry = vi.fn(() => ({}));
     static popStackEntry = vi.fn();
     static replaceStackEntry = vi.fn(() => ({}));

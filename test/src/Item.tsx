@@ -29,7 +29,7 @@ interface Styles {
   icon: ViewStyle;
 }
 
-const styles = StyleSheet.create<Styles>({
+const styles: Styles = StyleSheet.create({
   itemContainer: {
     flexDirection: 'row',
     alignItems: 'center',

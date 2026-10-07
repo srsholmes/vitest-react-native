@@ -8,11 +8,18 @@ on:
 
 jobs:
   test:
+    name: test (Node ${{ matrix.node-version }}, RN ${{ matrix.react-native || 'latest' }})
     runs-on: ubuntu-latest
 
     strategy:
+      fail-fast: false
       matrix:
-        node-version: [20, 22]
+        node-version: [22, 24]
+        include:
+          # Oldest supported React Native (End of Cycle) on the oldest Node it
+          # supports, so the version-gated legacy mocks stay covered.
+          - node-version: 20
+            react-native: '0.85'
 
     steps:
       - name: Checkout
@@ -31,6 +38,10 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install
+
+      - name: Use React Native ${{ matrix.react-native }}
+        if: matrix.react-native
+        run: pnpm -r up react-native@~${{ matrix.react-native }}.0 @react-native/babel-preset@~${{ matrix.react-native }}.0
 
       - name: Build
         run: pnpm build

@@ -80,7 +80,12 @@ describe('VirtualizedList', () => {
   });
 
   test('has scroll methods', () => {
-    let listRef: VirtualizedList<Item> | null = null;
+    // Structural type: the instance type's export name differs across RN versions.
+    type ScrollMethods = Record<
+      'scrollToEnd' | 'scrollToIndex' | 'scrollToItem' | 'scrollToOffset',
+      unknown
+    >;
+    let listRef: ScrollMethods | null = null;
 
     render(
       <VirtualizedList
