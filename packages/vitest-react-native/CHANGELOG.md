@@ -1,5 +1,26 @@
 # @srsholmes/vitest-react-native
 
+## 0.1.6
+
+### Patch Changes
+
+- c594093: Fix intermittent `ENOENT` failures when several test runs share the transform cache.
+
+  On startup each run deleted every cache directory except its own version's. When runs with different cache versions overlapped (for example monorepo apps on different React Native versions testing in parallel), one run removed the directory another was writing to, and its tests failed with `ENOENT … .tmp`. Other versions' directories are now only removed after a day of inactivity, each run marks its own directory as in use, and a failed cache write falls back to the uncached transform instead of failing the test.
+
+- 645796a: Make transform cache file names robust.
+
+  Cache entries were named after the module's path relative to `cwd`, so they could hit `ENAMETOOLONG` when `node_modules` sits far outside the project (monorepos, symlinked stores) and contained a `:` when a Windows project and its dependencies are on different drives. Entries are now named `<basename>_<hash>`, where the hash covers the full path and the source, which also invalidates the cache when a dependency is patched in place (e.g. with patch-package).
+
+- 1ead419: Fix `KeyboardAvoidingView` and `ImageBackground` resolving to the wrong mock (#31).
+
+  Mocks were looked up by substring match, first registered wins, so `Keyboard/Keyboard` also matched `KeyboardAvoidingView.js` and `KeyboardAvoidingView` resolved to the Keyboard API object ("Element type is invalid … got: object"). Likewise `ImageBackground` got the `Image` mock. The most specific match now wins, and filenames are normalised so mocks also match Windows paths.
+
+  Behaviour changes:
+  - Snapshots containing `ImageBackground` or `KeyboardAvoidingView` now render those element names instead of `Image` / `View`.
+  - `ImageBackground` no longer carries `Image`'s statics (`getSize`, `prefetch`, …), matching real React Native.
+  - The `ViewNativeComponent` mock now exports no-op `Commands` (`focus`, `blur`, `hotspotUpdate`, `setPressed`).
+
 ## 0.1.5
 
 ### Patch Changes
