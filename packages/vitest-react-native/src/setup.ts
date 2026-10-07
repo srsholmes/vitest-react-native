@@ -67,13 +67,12 @@ g.performance = globalThis.performance || { now: Date.now };
 import { addHook } from 'pirates';
 import removeTypes from 'flow-remove-types';
 import * as esbuild from 'esbuild';
-import crypto from 'node:crypto';
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
 import { createRequire } from 'module';
 import { fileURLToPath } from 'node:url';
-import { readFromCache, writeToCache } from './cache.js';
+import { cacheFileName, hashSetupSources, readFromCache, writeToCache } from './cache.js';
 
 const require = createRequire(import.meta.url);
 
@@ -104,18 +103,12 @@ try {
   // Keep "unknown" fallback — only affects the cache dir name.
 }
 
-// Hash this file's bytes into the cache key so any edit to setup.ts (e.g. adding
-// a new mock) invalidates the cache automatically — no destructive end-of-file
-// wipe needed, which removes a major race window when many workers run in
-// parallel.
+// Hash the setup code into the cache key so any edit to the mocks invalidates
+// the cache automatically — no destructive end-of-file wipe needed, which
+// removes a major race window when many workers run in parallel.
 let setupHash = 'nohash';
 try {
-  const bundlePath = fileURLToPath(import.meta.url);
-  setupHash = crypto
-    .createHash('sha1')
-    .update(fs.readFileSync(bundlePath))
-    .digest('hex')
-    .slice(0, 12);
+  setupHash = hashSetupSources(fileURLToPath(import.meta.url));
 } catch {
   // keep nohash fallback
 }
@@ -144,8 +137,6 @@ try {
 } catch {
   /* ignore */
 }
-
-const root = process.cwd();
 
 // ============================================================================
 // STEP 4: Mock registry - stores module path to mock code mappings
@@ -193,8 +184,7 @@ require.extensions['.ios.js'] = require.extensions['.js'];
 
 // Process React Native modules
 const processReactNative = (code: string, filename: string): string => {
-  const cacheName = normalize(path.relative(root, filename)).replace(/\//g, '_');
-  const cachePath = path.join(cacheDir, cacheName);
+  const cachePath = path.join(cacheDir, cacheFileName(filename, code));
 
   const cached = readFromCache(cachePath);
   if (cached !== null) return cached;
