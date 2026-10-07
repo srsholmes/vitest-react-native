@@ -1,7 +1,7 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
 exports[`ImageBackground Component > matches snapshot 1`] = `
-<Image
+<ImageBackground
   ref={null}
   source={
     {
@@ -25,5 +25,5 @@ exports[`ImageBackground Component > matches snapshot 1`] = `
   >
     Background Image
   </Text>
-</Image>
+</ImageBackground>
 `;
