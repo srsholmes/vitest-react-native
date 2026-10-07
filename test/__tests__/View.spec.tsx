@@ -76,3 +76,16 @@ describe('View Component', () => {
     expect(toJSON()).toMatchSnapshot();
   });
 });
+
+describe('ViewNativeComponent', () => {
+  test('exports no-op native Commands', () => {
+    const {
+      default: ViewNativeComponent,
+      Commands,
+    } = require('react-native/Libraries/Components/View/ViewNativeComponent');
+    expect(ViewNativeComponent.displayName).toBe('View');
+    for (const command of ['focus', 'blur', 'hotspotUpdate', 'setPressed']) {
+      expect(() => Commands[command]({})).not.toThrow();
+    }
+  });
+});

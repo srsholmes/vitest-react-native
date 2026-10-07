@@ -67,13 +67,19 @@ g.performance = globalThis.performance || { now: Date.now };
 import { addHook } from 'pirates';
 import removeTypes from 'flow-remove-types';
 import * as esbuild from 'esbuild';
-import crypto from 'node:crypto';
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
 import { createRequire } from 'module';
 import { fileURLToPath } from 'node:url';
-import { readFromCache, writeToCache } from './cache.js';
+import {
+  cacheFileName,
+  hashSetupSources,
+  pruneStaleCacheDirs,
+  readFromCache,
+  writeToCache,
+} from './cache.js';
+import { findMock, type MockEntry } from './mocks.js';
 import { installExportsFallback } from './resolve.js';
 import { isRNBefore, parseRNVersion } from './version.js';
 
@@ -119,18 +125,12 @@ try {
   // Keep "unknown" fallback — only affects the cache dir name.
 }
 
-// Hash this file's bytes into the cache key so any edit to setup.ts (e.g. adding
-// a new mock) invalidates the cache automatically — no destructive end-of-file
-// wipe needed, which removes a major race window when many workers run in
-// parallel.
+// Hash the setup code into the cache key so any edit to the mocks invalidates
+// the cache automatically — no destructive end-of-file wipe needed, which
+// removes a major race window when many workers run in parallel.
 let setupHash = 'nohash';
 try {
-  const bundlePath = fileURLToPath(import.meta.url);
-  setupHash = crypto
-    .createHash('sha1')
-    .update(fs.readFileSync(bundlePath))
-    .digest('hex')
-    .slice(0, 12);
+  setupHash = hashSetupSources(fileURLToPath(import.meta.url));
 } catch {
   // keep nohash fallback
 }
@@ -140,41 +140,33 @@ const cacheDirBase = path.join(tmpDir, 'vrn');
 const version = `${reactNativeVersion}_${pluginVersion}_${setupHash}`;
 const cacheDir = path.join(cacheDirBase, version);
 
-if (!fs.existsSync(cacheDir)) {
-  fs.mkdirSync(cacheDir, { recursive: true });
-}
-
-// Clean old cache
+fs.mkdirSync(cacheDir, { recursive: true });
+// Mark this version's dir as in use so concurrent runs don't prune it.
 try {
-  const folders = fs.readdirSync(cacheDirBase);
-  folders.forEach((folder) => {
-    if (folder !== version) {
-      try {
-        fs.rmSync(path.join(cacheDirBase, folder), { recursive: true });
-      } catch {
-        /* ignore */
-      }
-    }
-  });
+  const now = new Date();
+  fs.utimesSync(cacheDir, now, now);
 } catch {
   /* ignore */
 }
+pruneStaleCacheDirs(cacheDirBase, version);
 
-const root = process.cwd();
+// The cache is only an optimisation: if a write fails (e.g. another process
+// removed the dir), return the transform uncached instead of failing the test.
+const tryWriteToCache = (cachePath: string, code: string): void => {
+  try {
+    writeToCache(cachePath, code);
+  } catch {
+    /* ignore */
+  }
+};
 
 // ============================================================================
 // STEP 4: Mock registry - stores module path to mock code mappings
 // ============================================================================
 
-interface MockEntry {
-  path: string;
-  code: string;
-}
-
 const mocked: MockEntry[] = [];
 
-const getMocked = (filePath: string): MockEntry | undefined =>
-  mocked.find((entry) => filePath.includes(entry.path));
+const getMocked = (filePath: string): MockEntry | undefined => findMock(mocked, filePath);
 
 // ============================================================================
 // STEP 5: Code transformation utilities
@@ -208,8 +200,7 @@ require.extensions['.ios.js'] = require.extensions['.js'];
 
 // Process React Native modules
 const processReactNative = (code: string, filename: string): string => {
-  const cacheName = normalize(path.relative(root, filename)).replace(/\//g, '_');
-  const cachePath = path.join(cacheDir, cacheName);
+  const cachePath = path.join(cacheDir, cacheFileName(filename, code));
 
   const cached = readFromCache(cachePath);
   if (cached !== null) return cached;
@@ -223,12 +214,12 @@ const processReactNative = (code: string, filename: string): string => {
     })(module, exports);`
       : '';
     const mockCode = `${original}\n${mock.code}`;
-    writeToCache(cachePath, mockCode);
+    tryWriteToCache(cachePath, mockCode);
     return mockCode;
   }
 
   const transformed = transformCode(code);
-  writeToCache(cachePath, transformed);
+  tryWriteToCache(cachePath, transformed);
   return transformed;
 };
 
@@ -762,7 +753,13 @@ mock(
     return React.createElement('View', { ...props, accessible, ref }, props.children);
   });
   ViewNativeComponent.displayName = 'View';
-  return { __esModule: true, default: ViewNativeComponent };
+  const Commands = {
+    focus: () => {},
+    blur: () => {},
+    hotspotUpdate: () => {},
+    setPressed: () => {},
+  };
+  return { __esModule: true, default: ViewNativeComponent, Commands };
 })()`
 );
 
