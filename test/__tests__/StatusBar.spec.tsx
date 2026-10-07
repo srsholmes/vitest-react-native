@@ -77,9 +77,12 @@ describe('StatusBar Component', () => {
   });
 
   test('renders with various props', () => {
+    // backgroundColor / translucent were removed in RN 0.87.
+    const legacyProps: Record<string, unknown> =
+      rnMinor < 87 ? { backgroundColor: '#000000', translucent: false } : {};
     const { toJSON } = render(
       <View>
-        <StatusBar barStyle="light-content" hidden={false} animated={true} />
+        <StatusBar barStyle="light-content" hidden={false} animated={true} {...legacyProps} />
       </View>
     );
     expect(toJSON()).toBeTruthy();

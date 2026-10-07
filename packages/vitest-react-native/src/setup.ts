@@ -75,6 +75,7 @@ import { createRequire } from 'module';
 import { fileURLToPath } from 'node:url';
 import { readFromCache, writeToCache } from './cache.js';
 import { installExportsFallback } from './resolve.js';
+import { isRNBefore, parseRNVersion } from './version.js';
 
 const require = createRequire(import.meta.url);
 
@@ -87,18 +88,23 @@ installExportsFallback();
 let reactNativeVersion = 'unknown';
 let pluginVersion = 'unknown';
 
-try {
-  const reactNativePkg = require('react-native/package.json');
-  reactNativeVersion = reactNativePkg.version;
-} catch {
-  // Keep "unknown" fallback — only affects the cache dir name.
+// Resolve react-native from the project, which is the copy tests load — not
+// from the plugin's own location, where pnpm may install a different peer.
+for (const from of [path.join(process.cwd(), 'noop.js'), import.meta.url]) {
+  try {
+    reactNativeVersion = createRequire(from)('react-native/package.json').version;
+    break;
+  } catch {
+    // Try the next location; "unknown" only affects the cache dir name.
+  }
 }
 
-// Installed RN version, used to mirror APIs React Native has removed. When it
-// can't be read, the parts are NaN and `rnBefore` keeps the legacy APIs.
-const [rnMajor, rnMinor, rnPatch] = reactNativeVersion.split('.').map((n) => parseInt(n, 10));
-const rnBefore = (minor: number): boolean => !(rnMinor >= minor);
-const rnVersionLiteral = `{ major: ${rnMajor || 0}, minor: ${rnMinor || 0}, patch: ${rnPatch || 0} }`;
+// Installed RN version, used to mirror APIs React Native has removed.
+const rnVersion = parseRNVersion(reactNativeVersion);
+const rnBefore = (major: number, minor: number): boolean => isRNBefore(rnVersion, major, minor);
+const rnVersionLiteral = rnVersion
+  ? `{ major: ${rnVersion.major}, minor: ${rnVersion.minor}, patch: ${rnVersion.patch} }`
+  : '{ major: 0, minor: 0, patch: 0 }';
 
 try {
   // setup.ts lives at <pkg>/src/setup.ts in development and at <pkg>/dist/setup.{js,cjs}
@@ -516,8 +522,6 @@ mock(
     },
     compose: (style1, style2) => [style1, style2],
     absoluteFill: { position: 'absolute', left: 0, right: 0, top: 0, bottom: 0 },
-    // Removed in RN 0.85.
-    ${rnBefore(85) ? "absoluteFillObject: { position: 'absolute', left: 0, right: 0, top: 0, bottom: 0 }," : ''}
     hairlineWidth: 0.5,
     setStyleAttributePreprocessor: () => {},
   };
@@ -949,7 +953,7 @@ mock(
     static setBarStyle = vi.fn();
     static setHidden = vi.fn();
     // Removed in RN 0.87.
-    ${rnBefore(87) ? `static setBackgroundColor = vi.fn();
+    ${rnBefore(0, 87) ? `static setBackgroundColor = vi.fn();
     static setNetworkActivityIndicatorVisible = vi.fn();
     static setTranslucent = vi.fn();` : ''}
     static pushStackEntry = vi.fn(() => ({}));

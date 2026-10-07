@@ -19,7 +19,7 @@
     }
   },
   "engines": {
-    "node": ">=20"
+    "node": ">=20.19.4"
   },
   "sideEffects": false,
   "scripts": {
@@ -52,8 +52,8 @@
     "access": "public"
   },
   "peerDependencies": {
-    "react": ">=18",
-    "react-native": ">=0.72",
+    "react": ">=19.2.3",
+    "react-native": ">=0.85",
     "vite": ">=6",
     "vitest": ">=4"
   },

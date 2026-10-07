@@ -11,7 +11,7 @@ Run your React Native component tests in [Vitest](https://vitest.dev/) — no em
 
 - **Fast** — Run tests in Node.js without building native code
 - **Full React Native API support** — Mocks for all core components and APIs
-- **Compatible with React Native 0.72+** — Supports modern React Native architecture
+- **Tracks React Native's supported releases** — see [Supported React Native versions](#supported-react-native-versions)
 - **Works with @testing-library/react-native** — Use familiar testing patterns
 - **TypeScript support** — Full type definitions included
 
@@ -236,11 +236,26 @@ it('matches snapshot', () => {
 });
 ```
 
+## Supported React Native versions
+
+This package follows React Native's own [support policy](https://github.com/reactwg/react-native-releases/blob/main/docs/support.md): it supports the releases React Native marks as **Active** or **End of Cycle**. When React Native moves a release to Unsupported, a later minor release of this package may drop it.
+
+| `@srsholmes/vitest-react-native` | React Native |
+| -------------------------------- | ------------ |
+| 0.2.x                            | 0.85 – 0.87  |
+| 0.1.x                            | 0.79 – 0.84  |
+
+On an older React Native, stay on the matching version of this package (for example `npm install -D @srsholmes/vitest-react-native@0.1`).
+
+While this package is below 1.0, a minor bump (0.1 → 0.2) signals breaking changes, such as dropping React Native versions; patch releases are always compatible. `^0.1.x` will never install 0.2.
+
+Mocks follow the installed React Native version: APIs React Native has removed (for example `InteractionManager` and the `StatusBar.setBackgroundColor` / `setTranslucent` / `setNetworkActivityIndicatorVisible` setters in 0.87) are not mocked on versions where they no longer exist, so tests fail the same way the app would.
+
 ## Requirements
 
-- Node.js 18+ (React Native 0.87+ itself requires Node.js 22.13+)
-- React 18+
-- React Native 0.72+ (tested up to 0.87)
+- Node.js 20.19.4+ (React Native 0.87 itself requires Node.js 22.13+)
+- React 19.2.3+
+- React Native — see [Supported React Native versions](#supported-react-native-versions)
 - Vitest 4+
 - Vite 6+
 

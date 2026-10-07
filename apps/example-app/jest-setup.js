@@ -371,10 +371,6 @@ jest.mock('react-native/Libraries/StyleSheet/StyleSheet', () => {
     hairlineWidth: 0.5,
     setStyleAttributePreprocessor: jest.fn(),
   };
-  // Removed in RN 0.85.
-  if (Number(require('react-native/package.json').version.split('.')[1]) < 85) {
-    StyleSheet.absoluteFillObject = StyleSheet.absoluteFill;
-  }
   return { __esModule: true, default: StyleSheet, ...StyleSheet };
 });
 
