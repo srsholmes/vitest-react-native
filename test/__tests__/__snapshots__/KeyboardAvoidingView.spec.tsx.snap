@@ -1,8 +1,8 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
 exports[`KeyboardAvoidingView Component > matches snapshot with form layout 1`] = `
-<View
-  accessible={false}
+<KeyboardAvoidingView
+  behavior="padding"
   ref={null}
   style={
     {
@@ -25,5 +25,5 @@ exports[`KeyboardAvoidingView Component > matches snapshot with form layout 1`] 
   >
     Submit Form
   </Text>
-</View>
+</KeyboardAvoidingView>
 `;

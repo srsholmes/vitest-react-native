@@ -1,67 +1,42 @@
 import React from 'react';
 import { test, expect, describe } from 'vitest';
 import { render } from '@testing-library/react-native';
-import { Text, TextInput, View } from 'react-native';
+import { KeyboardAvoidingView, Text, TextInput } from 'react-native';
 
-// KeyboardAvoidingView may not be properly mocked in test environment
-// These tests verify the component can be used when available
 describe('KeyboardAvoidingView Component', () => {
-  // Dynamic import to handle potential mock issues
-  const _getKeyboardAvoidingView = () => {
-    try {
-      const { KeyboardAvoidingView } = require('react-native');
-      // Check if it's actually a valid component
-      if (
-        typeof KeyboardAvoidingView === 'function' ||
-        (KeyboardAvoidingView && typeof KeyboardAvoidingView.render === 'function')
-      ) {
-        return KeyboardAvoidingView;
-      }
-      return null;
-    } catch {
-      return null;
-    }
-  };
-
-  test('KeyboardAvoidingView exists in react-native exports', () => {
-    const { KeyboardAvoidingView } = require('react-native');
-    // This test documents that KeyboardAvoidingView is exported
-    // It may be an object due to mock limitations
-    expect(KeyboardAvoidingView).toBeDefined();
+  // https://github.com/srsholmes/vitest-react-native/issues/31
+  test('renders the KeyboardAvoidingView mock, not the Keyboard API', () => {
+    const { toJSON } = render(<KeyboardAvoidingView />);
+    expect(toJSON()).toMatchObject({ type: 'KeyboardAvoidingView' });
   });
 
-  test('renders using View as fallback when KeyboardAvoidingView mock has issues', () => {
-    // Use View as a reliable fallback that demonstrates the pattern
+  test('renders children', () => {
     const { getByTestId, getByText } = render(
-      <View testID="keyboard-avoiding-view" style={{ flex: 1 }}>
+      <KeyboardAvoidingView testID="kav" behavior="padding" style={{ flex: 1 }}>
         <TextInput testID="text-input" placeholder="Enter text" />
         <Text>Submit</Text>
-      </View>
+      </KeyboardAvoidingView>
     );
-    expect(getByTestId('keyboard-avoiding-view')).toBeTruthy();
+    expect(getByTestId('kav')).toBeTruthy();
     expect(getByTestId('text-input')).toBeTruthy();
     expect(getByText('Submit')).toBeTruthy();
   });
 
-  test('can render nested inputs in container', () => {
+  test('passes props through', () => {
     const { getByTestId } = render(
-      <View testID="outer-view" style={{ flex: 1 }}>
-        <View testID="inner-view">
-          <TextInput testID="input" placeholder="Type here" />
-        </View>
-      </View>
+      <KeyboardAvoidingView testID="kav" behavior="height" keyboardVerticalOffset={64} />
     );
-    expect(getByTestId('outer-view')).toBeTruthy();
-    expect(getByTestId('inner-view')).toBeTruthy();
-    expect(getByTestId('input')).toBeTruthy();
+    const kav = getByTestId('kav');
+    expect(kav.props.behavior).toBe('height');
+    expect(kav.props.keyboardVerticalOffset).toBe(64);
   });
 
   test('matches snapshot with form layout', () => {
     const { toJSON } = render(
-      <View style={{ flex: 1, padding: 20 }}>
+      <KeyboardAvoidingView behavior="padding" style={{ flex: 1, padding: 20 }}>
         <TextInput placeholder="Enter text" style={{ marginBottom: 10 }} />
         <Text>Submit Form</Text>
-      </View>
+      </KeyboardAvoidingView>
     );
     expect(toJSON()).toMatchSnapshot();
   });
