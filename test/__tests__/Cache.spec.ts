@@ -3,7 +3,11 @@ import os from 'os';
 import path from 'path';
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 
-import { readFromCache, writeToCache } from '../../packages/vitest-react-native/src/cache.js';
+import {
+  pruneStaleCacheDirs,
+  readFromCache,
+  writeToCache,
+} from '../../packages/vitest-react-native/src/cache.js';
 
 let tmpRoot: string;
 
@@ -93,5 +97,39 @@ describe('cache primitives', () => {
       .readdirSync(tmpRoot)
       .filter((name) => name.endsWith('.tmp'));
     expect(leftovers).toEqual([]);
+  });
+});
+
+describe('pruneStaleCacheDirs', () => {
+  const makeDir = (name: string, ageMs: number) => {
+    const dir = path.join(tmpRoot, name);
+    fs.mkdirSync(dir);
+    fs.writeFileSync(path.join(dir, 'entry.js'), 'x');
+    const t = new Date(Date.now() - ageMs);
+    fs.utimesSync(dir, t, t);
+    return dir;
+  };
+  const DAY = 24 * 60 * 60 * 1000;
+
+  it('removes other versions that have been idle for longer than maxAge', () => {
+    makeDir('old', 2 * DAY);
+    pruneStaleCacheDirs(tmpRoot, 'current');
+    expect(fs.existsSync(path.join(tmpRoot, 'old'))).toBe(false);
+  });
+
+  it('keeps recently used dirs of other versions (concurrent runs)', () => {
+    makeDir('other-run', 60 * 1000);
+    pruneStaleCacheDirs(tmpRoot, 'current');
+    expect(fs.existsSync(path.join(tmpRoot, 'other-run', 'entry.js'))).toBe(true);
+  });
+
+  it('never removes the current version, however old', () => {
+    makeDir('current', 10 * DAY);
+    pruneStaleCacheDirs(tmpRoot, 'current');
+    expect(fs.existsSync(path.join(tmpRoot, 'current'))).toBe(true);
+  });
+
+  it('ignores a missing base dir', () => {
+    expect(() => pruneStaleCacheDirs(path.join(tmpRoot, 'nope'), 'current')).not.toThrow();
   });
 });

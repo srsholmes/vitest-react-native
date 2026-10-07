@@ -73,7 +73,7 @@ import os from 'os';
 import path from 'path';
 import { createRequire } from 'module';
 import { fileURLToPath } from 'node:url';
-import { readFromCache, writeToCache } from './cache.js';
+import { pruneStaleCacheDirs, readFromCache, writeToCache } from './cache.js';
 
 const require = createRequire(import.meta.url);
 
@@ -125,25 +125,25 @@ const cacheDirBase = path.join(tmpDir, 'vrn');
 const version = `${reactNativeVersion}_${pluginVersion}_${setupHash}`;
 const cacheDir = path.join(cacheDirBase, version);
 
-if (!fs.existsSync(cacheDir)) {
-  fs.mkdirSync(cacheDir, { recursive: true });
-}
-
-// Clean old cache
+fs.mkdirSync(cacheDir, { recursive: true });
+// Mark this version's dir as in use so concurrent runs don't prune it.
 try {
-  const folders = fs.readdirSync(cacheDirBase);
-  folders.forEach((folder) => {
-    if (folder !== version) {
-      try {
-        fs.rmSync(path.join(cacheDirBase, folder), { recursive: true });
-      } catch {
-        /* ignore */
-      }
-    }
-  });
+  const now = new Date();
+  fs.utimesSync(cacheDir, now, now);
 } catch {
   /* ignore */
 }
+pruneStaleCacheDirs(cacheDirBase, version);
+
+// The cache is only an optimisation: if a write fails (e.g. another process
+// removed the dir), return the transform uncached instead of failing the test.
+const tryWriteToCache = (cachePath: string, code: string): void => {
+  try {
+    writeToCache(cachePath, code);
+  } catch {
+    /* ignore */
+  }
+};
 
 const root = process.cwd();
 
@@ -208,12 +208,12 @@ const processReactNative = (code: string, filename: string): string => {
     })(module, exports);`
       : '';
     const mockCode = `${original}\n${mock.code}`;
-    writeToCache(cachePath, mockCode);
+    tryWriteToCache(cachePath, mockCode);
     return mockCode;
   }
 
   const transformed = transformCode(code);
-  writeToCache(cachePath, transformed);
+  tryWriteToCache(cachePath, transformed);
   return transformed;
 };
 
