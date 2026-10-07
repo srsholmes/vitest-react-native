@@ -60,12 +60,14 @@
   "dependencies": {
     "@react-native/polyfills": "^2.0.0",
     "esbuild": "^0.27.4",
-    "flow-remove-types": "^2.257.1",
+    "flow-remove-types": "^2.334.0",
     "pirates": "^4.0.6",
     "regenerator-runtime": "^0.14.1"
   },
   "devDependencies": {
     "@types/node": "^22.10.7",
+    "react": "^19.2.3",
+    "react-native": "^0.87.1",
     "typescript": "^5.7.3",
     "vite": "^8.0.3",
     "vitest": "^4.1.2"

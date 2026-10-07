@@ -1,5 +1,5 @@
 /**
- * Custom Jest setup for React Native 0.83 + React 19 compatibility.
+ * Custom Jest setup for React Native 0.87 + React 19 compatibility.
  *
  * React Native's built-in jest-preset (mockComponent.js) doesn't work with
  * React 19 + pnpm because jest.requireActual fails to load the actual
@@ -312,14 +312,18 @@ jest.mock('react-native/Libraries/Components/StatusBar/StatusBar', () => {
   class mockStatusBar extends mockReact.Component {
     static currentHeight = 42;
     static setBarStyle = jest.fn();
-    static setBackgroundColor = jest.fn();
     static setHidden = jest.fn();
-    static setNetworkActivityIndicatorVisible = jest.fn();
-    static setTranslucent = jest.fn();
     static pushStackEntry = jest.fn(() => ({}));
     static popStackEntry = jest.fn();
     static replaceStackEntry = jest.fn(() => ({}));
     render() { return null; }
+  }
+  // Removed in RN 0.87.
+  const mockRnMinor = Number(require('react-native/package.json').version.split('.')[1]);
+  if (mockRnMinor < 87) {
+    mockStatusBar.setBackgroundColor = jest.fn();
+    mockStatusBar.setNetworkActivityIndicatorVisible = jest.fn();
+    mockStatusBar.setTranslucent = jest.fn();
   }
   return { __esModule: true, default: mockStatusBar };
 });
@@ -364,16 +368,13 @@ jest.mock('react-native/Libraries/StyleSheet/StyleSheet', () => {
       top: 0,
       bottom: 0,
     },
-    absoluteFillObject: {
-      position: 'absolute',
-      left: 0,
-      right: 0,
-      top: 0,
-      bottom: 0,
-    },
     hairlineWidth: 0.5,
     setStyleAttributePreprocessor: jest.fn(),
   };
+  // Removed in RN 0.85.
+  if (Number(require('react-native/package.json').version.split('.')[1]) < 85) {
+    StyleSheet.absoluteFillObject = StyleSheet.absoluteFill;
+  }
   return { __esModule: true, default: StyleSheet, ...StyleSheet };
 });
 
@@ -474,19 +475,23 @@ jest.mock('react-native/Libraries/LayoutAnimation/LayoutAnimation', () => ({
   },
 }));
 
-jest.mock('react-native/Libraries/Interaction/InteractionManager', () => ({
-  __esModule: true,
-  default: {
-    runAfterInteractions: jest.fn((task) => {
-      if (typeof task === 'function') task();
-      else if (task && typeof task.gen === 'function') task.gen();
-      return { then: jest.fn(), done: jest.fn(), cancel: jest.fn() };
-    }),
-    createInteractionHandle: jest.fn(() => 1),
-    clearInteractionHandle: jest.fn(),
-    setDeadline: jest.fn(),
-  },
-}));
+// RN 0.87 deleted InteractionManager (index.js now throws on access in __DEV__).
+const [, rnMinor] = require('react-native/package.json').version.split('.').map(Number);
+if (rnMinor < 87) {
+  jest.mock('react-native/Libraries/Interaction/InteractionManager', () => ({
+    __esModule: true,
+    default: {
+      runAfterInteractions: jest.fn((task) => {
+        if (typeof task === 'function') task();
+        else if (task && typeof task.gen === 'function') task.gen();
+        return { then: jest.fn(), done: jest.fn(), cancel: jest.fn() };
+      }),
+      createInteractionHandle: jest.fn(() => 1),
+      clearInteractionHandle: jest.fn(),
+      setDeadline: jest.fn(),
+    },
+  }));
+}
 
 jest.mock('react-native/Libraries/Interaction/PanResponder', () => ({
   __esModule: true,

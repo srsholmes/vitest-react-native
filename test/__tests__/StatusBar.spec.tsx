@@ -2,6 +2,7 @@ import React from 'react';
 import { test, expect, describe, vi, beforeEach } from 'vitest';
 import { render } from '@testing-library/react-native';
 import { StatusBar, View } from 'react-native';
+import { rnMinor } from '../src/rnVersion';
 
 describe('StatusBar Component', () => {
   beforeEach(() => {
@@ -27,9 +28,19 @@ describe('StatusBar Component', () => {
     expect(StatusBar.setBarStyle).toHaveBeenCalledWith('light-content');
   });
 
-  test('setBackgroundColor is callable', () => {
-    StatusBar.setBackgroundColor('#000000');
-    expect(StatusBar.setBackgroundColor).toHaveBeenCalledWith('#000000');
+  // setBackgroundColor / setNetworkActivityIndicatorVisible / setTranslucent
+  // were removed in RN 0.87; the mock only provides them on older versions.
+  const LegacyStatusBar = StatusBar as typeof StatusBar & Record<string, any>;
+
+  test.runIf(rnMinor >= 87)('legacy setters are removed (RN >= 0.87)', () => {
+    expect(LegacyStatusBar.setBackgroundColor).toBeUndefined();
+    expect(LegacyStatusBar.setNetworkActivityIndicatorVisible).toBeUndefined();
+    expect(LegacyStatusBar.setTranslucent).toBeUndefined();
+  });
+
+  test.runIf(rnMinor < 87)('setBackgroundColor is callable', () => {
+    LegacyStatusBar.setBackgroundColor('#000000');
+    expect(LegacyStatusBar.setBackgroundColor).toHaveBeenCalledWith('#000000');
   });
 
   test('setHidden is callable', () => {
@@ -37,14 +48,14 @@ describe('StatusBar Component', () => {
     expect(StatusBar.setHidden).toHaveBeenCalledWith(true);
   });
 
-  test('setNetworkActivityIndicatorVisible is callable', () => {
-    StatusBar.setNetworkActivityIndicatorVisible(true);
-    expect(StatusBar.setNetworkActivityIndicatorVisible).toHaveBeenCalledWith(true);
+  test.runIf(rnMinor < 87)('setNetworkActivityIndicatorVisible is callable', () => {
+    LegacyStatusBar.setNetworkActivityIndicatorVisible(true);
+    expect(LegacyStatusBar.setNetworkActivityIndicatorVisible).toHaveBeenCalledWith(true);
   });
 
-  test('setTranslucent is callable', () => {
-    StatusBar.setTranslucent(true);
-    expect(StatusBar.setTranslucent).toHaveBeenCalledWith(true);
+  test.runIf(rnMinor < 87)('setTranslucent is callable', () => {
+    LegacyStatusBar.setTranslucent(true);
+    expect(LegacyStatusBar.setTranslucent).toHaveBeenCalledWith(true);
   });
 
   test('pushStackEntry returns object', () => {
@@ -68,13 +79,7 @@ describe('StatusBar Component', () => {
   test('renders with various props', () => {
     const { toJSON } = render(
       <View>
-        <StatusBar
-          barStyle="light-content"
-          backgroundColor="#000000"
-          hidden={false}
-          animated={true}
-          translucent={false}
-        />
+        <StatusBar barStyle="light-content" hidden={false} animated={true} />
       </View>
     );
     expect(toJSON()).toBeTruthy();

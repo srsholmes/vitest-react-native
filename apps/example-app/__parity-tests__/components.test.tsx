@@ -595,7 +595,12 @@ describe('StatusBar', () => {
   test('static methods are callable', () => {
     expect(() => StatusBar.setBarStyle('dark-content')).not.toThrow();
     expect(() => StatusBar.setHidden(false)).not.toThrow();
-    expect(() => StatusBar.setBackgroundColor('#fff')).not.toThrow();
+  });
+
+  // Removed in RN 0.87.
+  const rnMinor = Number(require('react-native/package.json').version.split('.')[1]);
+  (rnMinor >= 87 ? test : test.skip)('legacy setters are removed (RN >= 0.87)', () => {
+    expect((StatusBar as any).setBackgroundColor).toBeUndefined();
   });
 });
 

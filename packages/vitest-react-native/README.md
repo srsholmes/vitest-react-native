@@ -185,7 +185,7 @@ All core React Native components are mocked and render as testable elements:
 | AccessibilityInfo  | ✅     | Full accessibility API                       |
 | Appearance         | ✅     | getColorScheme, addChangeListener            |
 | LayoutAnimation    | ✅     | configureNext, create, Presets               |
-| InteractionManager | ✅     | runAfterInteractions                         |
+| InteractionManager | ✅     | runAfterInteractions (removed in RN 0.87)    |
 | PanResponder       | ✅     | create                                       |
 | NativeEventEmitter | ✅     | addListener, removeAllListeners              |
 
@@ -238,11 +238,11 @@ it('matches snapshot', () => {
 
 ## Requirements
 
-- Node.js 18+
+- Node.js 18+ (React Native 0.87+ itself requires Node.js 22.13+)
 - React 18+
-- React Native 0.72+
-- Vitest 1+
-- Vite 5+
+- React Native 0.72+ (tested up to 0.87)
+- Vitest 4+
+- Vite 6+
 
 ## Troubleshooting
 

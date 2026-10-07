@@ -1,7 +1,7 @@
 import React from 'react';
 import { describe, test, expect } from 'vitest';
 import { render } from '@testing-library/react-native';
-import { VirtualizedList, Text, View } from 'react-native';
+import { VirtualizedList, Text, View, type VirtualizedListInstance } from 'react-native';
 
 interface Item {
   id: string;
@@ -80,7 +80,7 @@ describe('VirtualizedList', () => {
   });
 
   test('has scroll methods', () => {
-    let listRef: VirtualizedList<Item> | null = null;
+    let listRef: VirtualizedListInstance | null = null;
 
     render(
       <VirtualizedList

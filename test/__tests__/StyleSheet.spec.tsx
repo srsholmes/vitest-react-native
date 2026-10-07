@@ -1,6 +1,7 @@
 import React from 'react';
 import { test, expect, describe } from 'vitest';
 import { StyleSheet, View, Text } from 'react-native';
+import { rnMinor } from '../src/rnVersion';
 import { render } from '@testing-library/react-native';
 
 describe('StyleSheet', () => {
@@ -62,13 +63,21 @@ describe('StyleSheet', () => {
     expect(StyleSheet.absoluteFill.position).toBe('absolute');
   });
 
-  test('absoluteFillObject is defined', () => {
-    expect(StyleSheet.absoluteFillObject).toBeDefined();
-    expect(StyleSheet.absoluteFillObject.position).toBe('absolute');
-    expect(StyleSheet.absoluteFillObject.left).toBe(0);
-    expect(StyleSheet.absoluteFillObject.right).toBe(0);
-    expect(StyleSheet.absoluteFillObject.top).toBe(0);
-    expect(StyleSheet.absoluteFillObject.bottom).toBe(0);
+  // absoluteFillObject was removed in RN 0.85; the mock mirrors that.
+  const LegacyStyleSheet = StyleSheet as typeof StyleSheet & Record<string, any>;
+
+  test.runIf(rnMinor >= 85)('absoluteFillObject is removed (RN >= 0.85)', () => {
+    expect(LegacyStyleSheet.absoluteFillObject).toBeUndefined();
+  });
+
+  test.runIf(rnMinor < 85)('absoluteFillObject is defined', () => {
+    expect(LegacyStyleSheet.absoluteFillObject).toEqual({
+      position: 'absolute',
+      left: 0,
+      right: 0,
+      top: 0,
+      bottom: 0,
+    });
   });
 
   test('hairlineWidth is defined', () => {
