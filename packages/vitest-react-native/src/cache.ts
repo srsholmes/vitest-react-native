@@ -65,3 +65,35 @@ export const hashSetupSources = (entryPath: string): string => {
   }
   return hash.digest('hex').slice(0, 12);
 };
+
+const DAY_MS = 24 * 60 * 60 * 1000;
+
+// Remove cache dirs for other versions, but only once they have been idle for
+// `maxAgeMs`. Several test runs can share os.tmpdir() with different cache
+// versions (e.g. monorepo apps on different RN versions running in parallel);
+// deleting a sibling dir unconditionally pulled it out from under a run that
+// was still using it. Each run touches its own dir on startup to stay fresh.
+export const pruneStaleCacheDirs = (
+  base: string,
+  keep: string,
+  maxAgeMs: number = DAY_MS,
+  now: number = Date.now()
+): void => {
+  let folders: string[];
+  try {
+    folders = fs.readdirSync(base);
+  } catch {
+    return;
+  }
+  for (const folder of folders) {
+    if (folder === keep) continue;
+    const dir = path.join(base, folder);
+    try {
+      if (now - fs.statSync(dir).mtimeMs > maxAgeMs) {
+        fs.rmSync(dir, { recursive: true, force: true });
+      }
+    } catch {
+      /* raced with another run's cleanup — ignore */
+    }
+  }
+};
