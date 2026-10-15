@@ -51,9 +51,23 @@ describe('Platform', () => {
 
   test('select returns default when no match', () => {
     const result = Platform.select({ android: 'A', default: 'D' });
-    // Under jest-preset, OS is ios so 'android' won't match → default 'D'
-    // Under vitest, same behaviour
+    // OS is ios in both runners, so 'android' won't match → default 'D'
     expect(result).toBe('D');
+  });
+
+  test('select follows Platform.OS when it changes', () => {
+    const platform = Platform as typeof Platform & { OS: string };
+    const original = platform.OS;
+    try {
+      platform.OS = 'android';
+      expect(Platform.select({ ios: 'I', android: 'A', default: 'D' })).toBe('A');
+    } finally {
+      platform.OS = original;
+    }
+  });
+
+  test('select prefers an explicit undefined over default', () => {
+    expect(Platform.select({ ios: undefined, default: 'D' })).toBeUndefined();
   });
 
   test('constants.reactNativeVersion exists', () => {
@@ -88,6 +102,33 @@ describe('Dimensions', () => {
     const sub = Dimensions.addEventListener('change', handler);
     expect(sub).toBeDefined();
     expect(typeof sub.remove).toBe('function');
+    sub.remove();
+  });
+
+  test('set updates get and notifies listeners', () => {
+    const dimensions = Dimensions as unknown as { _reset: () => void };
+    const handler = fn();
+    const sub = Dimensions.addEventListener('change', handler);
+    try {
+      Dimensions.set({ window: { width: 500, height: 900, scale: 3, fontScale: 1 } });
+
+      expect(Dimensions.get('window').width).toBe(500);
+      expect(handler).toHaveBeenCalledTimes(1);
+    } finally {
+      sub.remove();
+      dimensions._reset();
+    }
+  });
+
+  test('useWindowDimensions agrees with Dimensions after a change', () => {
+    const dimensions = Dimensions as unknown as { _reset: () => void };
+    try {
+      Dimensions.set({ window: { width: 500, height: 900, scale: 3, fontScale: 1 } });
+
+      expect(useWindowDimensions()).toEqual(Dimensions.get('window'));
+    } finally {
+      dimensions._reset();
+    }
   });
 });
 

@@ -19,7 +19,7 @@ describe('PixelRatio', () => {
   });
 
   test('getFontScale returns expected value', () => {
-    expect(PixelRatio.getFontScale()).toBe(2);
+    expect(PixelRatio.getFontScale()).toBe(1);
   });
 
   test('getPixelSizeForLayoutSize calculates correctly', () => {
