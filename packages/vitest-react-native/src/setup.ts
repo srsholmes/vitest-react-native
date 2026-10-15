@@ -54,7 +54,13 @@ g.__DEV__ = true;
 g.IS_REACT_ACT_ENVIRONMENT = true;
 g.IS_REACT_NATIVE_TEST_ENVIRONMENT = true;
 g.nativeFabricUIManager = {};
-g.window = globalThis;
+// The bridge config React Native's batched bridge reads at startup.
+g.__fbBatchedBridgeConfig = { remoteModuleConfig: [], localModulesConfig: [] };
+// Only when there is no window: assigning unconditionally replaced jsdom's window
+// with globalThis for anyone running a browser-like environment.
+if (g.window === undefined) {
+  g.window = globalThis;
+}
 g.cancelAnimationFrame = (id: number) => clearTimeout(id);
 g.requestAnimationFrame = (callback: (time: number) => void) =>
   setTimeout(() => callback(Date.now()), 0);
@@ -244,6 +250,16 @@ addHook((code, filename) => processReactNative(code, filename), {
 
 try {
   require('@react-native/polyfills/Object.es8');
+} catch {
+  /* polyfills may not be available */
+}
+
+// React Native's real error-guard polyfill, which assigns global.ErrorUtils. Library
+// code reads it at module scope — Expo's Expo.fx calls getGlobalHandler() while
+// loading — so without it those imports fail before any test runs. Loaded here rather
+// than in STEP 1 because it is Flow-typed and needs the require hook already installed.
+try {
+  require('@react-native/polyfills/error-guard');
 } catch {
   /* polyfills may not be available */
 }
@@ -534,12 +550,22 @@ mock(
     constants: {
       reactNativeVersion: ${rnVersionLiteral},
     },
+    // Reads Platform.OS at call time, so a test that sets \`Platform.OS = 'android'\`
+    // gets the Android branch. Baking the OS in at build time silently returned the
+    // iOS value to every Android test.
+    //
+    // Key presence (\`in\`), not \`??\`, matching RN's own Platform.ios.js: an explicit
+    // \`{ ios: undefined }\` selects undefined rather than falling through to default.
     select: (obj) => {
-      if ('ios' in obj) return obj.ios;
+      if (Platform.OS in obj) return obj[Platform.OS];
       if ('native' in obj) return obj.native;
       return obj.default;
     },
   };
+  // The spread copies OS by value onto the module namespace, so select() follows
+  // mutations made through the default export (what \`import { Platform }\` and RN's
+  // internals use) but not through \`require(...).OS\`. The default export is the
+  // supported path for switching platform.
   return { __esModule: true, default: Platform, ...Platform };
 })()`
 );
@@ -596,8 +622,8 @@ mock(
     DeviceInfo: {
       getConstants: () => ({
         Dimensions: {
-          window: { fontScale: 2, height: 1334, scale: 2, width: 750 },
-          screen: { fontScale: 2, height: 1334, scale: 2, width: 750 },
+          window: { fontScale: 1, height: 1334, scale: 2, width: 750 },
+          screen: { fontScale: 1, height: 1334, scale: 2, width: 750 },
         },
       }),
     },
@@ -1096,19 +1122,44 @@ mock(
 // Dimensions
 mock(
   'react-native/Libraries/Utilities/Dimensions',
-  () => `{
-  __esModule: true,
-  default: {
-    get: (dim) => {
-      if (dim === 'window' || dim === 'screen') {
-        return { width: 750, height: 1334, scale: 2, fontScale: 2 };
-      }
-      return {};
+  () => `(() => {
+  // One source for both the initial value and _reset(), so a wrong initial value
+  // cannot hide behind a suite that resets before asserting.
+  const DEFAULTS = {
+    window: { width: 750, height: 1334, scale: 2, fontScale: 1 },
+    screen: { width: 750, height: 1334, scale: 2, fontScale: 1 },
+  };
+  const state = { window: { ...DEFAULTS.window }, screen: { ...DEFAULTS.screen } };
+  const listeners = new Set();
+  const has = (dim) => Object.prototype.hasOwnProperty.call(state, dim);
+  const snapshot = () => ({ window: { ...state.window }, screen: { ...state.screen } });
+
+  return {
+    __esModule: true,
+    default: {
+      // A copy: a caller mutating the result must not corrupt the mock's state.
+      get: vi.fn((dim) => (has(dim) ? { ...state[dim] } : {})),
+      // Merges, as React Native's does — set({ window: { width } }) keeps the height.
+      set: vi.fn((dims) => {
+        for (const dim of Object.keys(dims || {})) {
+          if (has(dim) && dims[dim]) Object.assign(state[dim], dims[dim]);
+        }
+        listeners.forEach((listener) => listener(snapshot()));
+      }),
+      addEventListener: vi.fn((type, handler) => {
+        listeners.add(handler);
+        return { remove: () => listeners.delete(handler) };
+      }),
+      // Not part of React Native's API: the mock's own hook for restoring the resting
+      // state between tests.
+      _reset: () => {
+        Object.assign(state.window, DEFAULTS.window);
+        Object.assign(state.screen, DEFAULTS.screen);
+        listeners.clear();
+      },
     },
-    set: vi.fn(),
-    addEventListener: vi.fn(() => ({ remove: vi.fn() })),
-  },
-}`
+  };
+})()`
 );
 
 // PixelRatio
@@ -1118,7 +1169,7 @@ mock(
   __esModule: true,
   default: {
     get: () => 2,
-    getFontScale: () => 2,
+    getFontScale: () => 1,
     getPixelSizeForLayoutSize: (size) => size * 2,
     roundToNearestPixel: (size) => Math.round(size * 2) / 2,
   },
@@ -1746,7 +1797,13 @@ mock(
   'react-native/Libraries/Utilities/useWindowDimensions',
   () => `{
   __esModule: true,
-  default: vi.fn(() => ({ width: 750, height: 1334, scale: 2, fontScale: 2 })),
+  // Reads Dimensions when called, so the hook and Dimensions.get('window') cannot
+  // disagree after Dimensions.set(). Unlike real React Native it does not subscribe,
+  // so an update does not itself trigger a re-render — a re-rendered component picks
+  // up the new value.
+  default: vi.fn(() =>
+    require('react-native/Libraries/Utilities/Dimensions').default.get('window')
+  ),
 }`
 );
 
@@ -1796,6 +1853,12 @@ mock(
       if (this.listeners[eventType]) {
         this.listeners[eventType].forEach(listener => listener(...args));
       }
+    }
+    // Not part of React Native's API. This mock is a module-level singleton whose
+    // listeners live for the whole test file, so it is the one place a subscription
+    // can leak from one test into the next.
+    _reset() {
+      this.listeners = {};
     }
   }
   return { __esModule: true, default: new DeviceEventEmitter() };

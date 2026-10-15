@@ -87,6 +87,35 @@ describe('Platform', () => {
     expect(result).toBeNull();
   });
 
+  // select must read Platform.OS when it is called, not bake in the OS the mock was
+  // built with — otherwise a test that switches to Android still gets the iOS branch.
+  test('select follows Platform.OS when it changes', () => {
+    const platform = Platform as typeof Platform & { OS: string };
+    const original = platform.OS;
+    try {
+      platform.OS = 'android';
+      expect(
+        Platform.select({ ios: 'iOS Value', android: 'Android Value', default: 'Default Value' })
+      ).toBe('Android Value');
+      expect(Platform.select({ ios: 'iOS Value', default: 'Default Value' })).toBe('Default Value');
+    } finally {
+      platform.OS = original;
+    }
+  });
+
+  test('select still prefers native over default when the OS key is absent', () => {
+    const platform = Platform as typeof Platform & { OS: string };
+    const original = platform.OS;
+    try {
+      platform.OS = 'android';
+      expect(Platform.select({ native: 'Native Value', default: 'Default Value' })).toBe(
+        'Native Value'
+      );
+    } finally {
+      platform.OS = original;
+    }
+  });
+
   test('constants contains reactNativeVersion', () => {
     expect(Platform.constants.reactNativeVersion).toBeDefined();
     expect(Platform.constants.reactNativeVersion.major).toBeDefined();
