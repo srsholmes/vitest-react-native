@@ -258,6 +258,10 @@ Mocks follow the installed React Native version: APIs React Native has removed (
 - React Native — see [Supported React Native versions](#supported-react-native-versions)
 - Vitest 4+
 - Vite 6+
+- `@babel/core` and `@react-native/babel-preset` — optional, and already present in any
+  React Native project. Needed only to load React Native modules written in Flow's
+  modern `enum` / `component` / `hook` syntax; see
+  [Flow syntax errors](#flow-syntax-errors).
 
 ## Troubleshooting
 
@@ -268,6 +272,17 @@ Ensure `react-native` is in your `devDependencies` and the plugin is properly co
 ### Flow syntax errors
 
 The setup file automatically strips Flow types from React Native source files. If you encounter issues, ensure the setup file is loaded first in your `setupFiles` array.
+
+Type stripping handles annotations, but not Flow's `enum`, `component` and `hook`
+_declarations_ — React Native's own Babel preset is the only thing that lowers those. When
+a React Native module uses them, the transform falls back to that preset automatically,
+provided `@babel/core` and `@react-native/babel-preset` resolve from your project (they
+ship with every React Native app). Without them you get an error naming both, and only for
+the modules that need them — everything else keeps using the faster Babel-free path.
+
+In React Native 0.87 this affects `experimental_LayoutConformance`, `VirtualViewMode` and
+the `unstable_Virtual*` exports. The syntax is spreading through React Native's source, so
+expect it to cover more over time.
 
 ### Component not rendering
 
