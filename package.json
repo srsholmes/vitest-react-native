@@ -19,8 +19,10 @@
     "release": "pnpm build && changeset publish"
   },
   "devDependencies": {
+    "@babel/core": "^7.29.0",
     "@changesets/cli": "^2.29.8",
     "@eslint/js": "^9.39.2",
+    "@react-native/babel-preset": "^0.87.1",
     "@react-navigation/bottom-tabs": "^7.2.0",
     "@react-navigation/native": "^7.0.14",
     "@react-navigation/native-stack": "^7.2.0",

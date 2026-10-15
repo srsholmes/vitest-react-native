@@ -21,23 +21,18 @@ import { createRequire } from 'module';
 const require_ = createRequire(import.meta.url);
 
 /**
- * Exports whose module cannot be compiled by `flow-remove-types` + esbuild.
+ * Exports whose module cannot be compiled at all.
  *
- * `flow-remove-types` erases type annotations only: it passes Flow's `enum`, `component`
- * and `hook` DECLARATIONS through untouched, and esbuild then fails on them
- * (`Unexpected "enum"`). React Native's own Babel preset is the only transformer that
- * lowers them. Every entry here is experimental or private API, so nothing an app should
- * import — but React Native is migrating core components to `component` syntax, so this
- * list is the early-warning signal for when that reaches exports people do use.
+ * Empty, and it should stay that way. `flow-remove-types` erases type annotations only
+ * and leaves Flow's `enum`, `component` and `hook` DECLARATIONS for esbuild to choke on,
+ * but the transform now falls back to React Native's own Babel preset, which lowers them
+ * — so the six experimental exports that used to live here load.
+ *
+ * That fallback needs `@babel/core` and `@react-native/babel-preset`, which this repo
+ * carries as devDependencies. A consumer project without them gets a clear error naming
+ * both; this test asserts the supported configuration.
  */
-const FLOW_SYNTAX_UNSUPPORTED = new Set([
-  'VirtualViewMode',
-  'experimental_LayoutConformance',
-  'unstable_VirtualColumn',
-  'unstable_VirtualRow',
-  'unstable_VirtualView',
-  'unstable_createVirtualCollectionView',
-]);
+const FLOW_SYNTAX_UNSUPPORTED = new Set<string>([]);
 
 /**
  * Exports that resolve to `undefined` rather than throwing.

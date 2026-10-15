@@ -87,6 +87,13 @@ import {
 } from './cache.js';
 import { findMock, type MockEntry } from './mocks.js';
 import { installExportsFallback } from './resolve.js';
+import {
+  babelToolchainVersions,
+  missingToolchainMessage,
+  resolveBabelToolchain,
+  transformWithBabel,
+  type BabelToolchain,
+} from './babel.js';
 import { isRNBefore, parseRNVersion } from './version.js';
 
 const require = createRequire(import.meta.url);
@@ -141,9 +148,15 @@ try {
   // keep nohash fallback
 }
 
+// The Babel fallback produces different output from esbuild, and that output changes
+// with the preset and @babel/core versions, so both key the cache directory. This is a
+// resolve plus a package.json read; @babel/core itself is required lazily, on the first
+// file that actually needs the fallback.
+const babelToolchain = babelToolchainVersions(process.cwd()) ?? 'nobabel';
+
 const tmpDir = os.tmpdir();
 const cacheDirBase = path.join(tmpDir, 'vrn');
-const version = `${reactNativeVersion}_${pluginVersion}_${setupHash}`;
+const version = `${reactNativeVersion}_${pluginVersion}_${setupHash}_${babelToolchain}`;
 const cacheDir = path.join(cacheDirBase, version);
 
 fs.mkdirSync(cacheDir, { recursive: true });
@@ -178,13 +191,35 @@ const getMocked = (filePath: string): MockEntry | undefined => findMock(mocked, 
 // STEP 5: Code transformation utilities
 // ============================================================================
 
-const transformCode = (code: string): string => {
+// Resolved once, on the first file that needs it: a project with no Babel keeps the
+// zero-Babel pipeline and pays nothing. `undefined` means "not looked up yet", `null`
+// means "looked up and absent".
+let cachedToolchain: BabelToolchain | null | undefined;
+
+const toolchain = (): BabelToolchain | null => {
+  if (cachedToolchain === undefined) cachedToolchain = resolveBabelToolchain(process.cwd());
+  return cachedToolchain;
+};
+
+const transformCode = (code: string, filename: string): string => {
   const result = removeTypes(code, { all: true }).toString();
-  return esbuild.transformSync(result, {
-    loader: 'jsx',
-    format: 'cjs',
-    platform: 'node',
-  }).code;
+  try {
+    return esbuild.transformSync(result, {
+      loader: 'jsx',
+      format: 'cjs',
+      platform: 'node',
+    }).code;
+  } catch (esbuildError) {
+    // flow-remove-types erases type ANNOTATIONS only: Flow's `enum`, `component` and
+    // `hook` declarations pass through untouched and esbuild cannot parse them. React
+    // Native's own Babel preset lowers them, so retry there — on the original source,
+    // because stripping has already mangled those declarations into invalid syntax.
+    const babel = toolchain();
+    if (!babel) {
+      throw new Error(missingToolchainMessage(filename, (esbuildError as Error).message));
+    }
+    return transformWithBabel(babel, code, filename);
+  }
 };
 
 const normalize = (p: string): string => p.replace(/\\/g, '/');
@@ -215,7 +250,7 @@ const processReactNative = (code: string, filename: string): string => {
   if (mock) {
     const original = mock.code.includes('__vitest__original__')
       ? `const __vitest__original__ = ((module, exports) => {
-      ${transformCode(code)}
+      ${transformCode(code, filename)}
       return module.exports
     })(module, exports);`
       : '';
@@ -224,7 +259,7 @@ const processReactNative = (code: string, filename: string): string => {
     return mockCode;
   }
 
-  const transformed = transformCode(code);
+  const transformed = transformCode(code, filename);
   tryWriteToCache(cachePath, transformed);
   return transformed;
 };
@@ -715,11 +750,15 @@ mock(
   'react-native/Libraries/NativeComponent/NativeComponentRegistry',
   () => `{
   get: (name, viewConfigProvider) => {
-    const requireNativeComponent = require('react-native/Libraries/ReactNative/requireNativeComponent');
+    // .default: the requireNativeComponent mock is an ES module shape, so the
+    // namespace object itself is not callable.
+    const requireNativeComponent = require('react-native/Libraries/ReactNative/requireNativeComponent').default;
     return requireNativeComponent(name);
   },
   getWithFallback_DEPRECATED: (name, viewConfigProvider) => {
-    const requireNativeComponent = require('react-native/Libraries/ReactNative/requireNativeComponent');
+    // .default: the requireNativeComponent mock is an ES module shape, so the
+    // namespace object itself is not callable.
+    const requireNativeComponent = require('react-native/Libraries/ReactNative/requireNativeComponent').default;
     return requireNativeComponent(name);
   },
   setRuntimeConfigProvider: () => {},
