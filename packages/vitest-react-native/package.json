@@ -16,6 +16,11 @@
       "types": "./dist/setup.d.ts",
       "import": "./dist/setup.js",
       "require": "./dist/setup.cjs"
+    },
+    "./helpers": {
+      "types": "./dist/helpers.d.ts",
+      "import": "./dist/helpers.js",
+      "require": "./dist/helpers.cjs"
     }
   },
   "engines": {
