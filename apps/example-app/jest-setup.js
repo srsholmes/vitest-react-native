@@ -21,6 +21,13 @@ global.__DEV__ = true;
 global.IS_REACT_ACT_ENVIRONMENT = true;
 global.IS_REACT_NATIVE_TEST_ENVIRONMENT = true;
 global.nativeFabricUIManager = {};
+// Reset hooks for the stateful mocks, mirroring the plugin's registry so the mock
+// bodies below can be identical on both sides.
+const statefulMocks = new Map();
+global.__vrnStateful = statefulMocks;
+global.__vrnRegisterStateful = (name, reset) => {
+  statefulMocks.set(name, reset);
+};
 // Only when there is no window, so a browser-like environment keeps its own.
 if (global.window === undefined) {
   global.window = global;
@@ -422,14 +429,37 @@ jest.mock('react-native/Libraries/Utilities/PixelRatio', () => ({
   },
 }));
 
-jest.mock('react-native/Libraries/AppState/AppState', () => ({
-  __esModule: true,
-  default: {
-    addEventListener: jest.fn(() => ({ remove: jest.fn() })),
-    currentState: 'active',
-    isAvailable: true,
-  },
-}));
+jest.mock('react-native/Libraries/AppState/AppState', () => {
+  const RESTING = 'active';
+  let current = RESTING;
+  const listeners = new Map();
+  const reset = () => {
+    current = RESTING;
+    listeners.clear();
+  };
+  global.__vrnRegisterStateful('AppState', reset);
+
+  return {
+    __esModule: true,
+    default: {
+      addEventListener: jest.fn((event, handler) => {
+        if (!listeners.has(event)) listeners.set(event, new Set());
+        listeners.get(event).add(handler);
+        return { remove: () => listeners.get(event) && listeners.get(event).delete(handler) };
+      }),
+      get currentState() {
+        return current;
+      },
+      isAvailable: true,
+      _setState: (next) => {
+        current = next;
+        const handlers = listeners.get('change');
+        if (handlers) handlers.forEach((handler) => handler(next));
+      },
+      _reset: reset,
+    },
+  };
+});
 
 jest.mock('react-native/Libraries/Linking/Linking', () => ({
   __esModule: true,
@@ -455,18 +485,63 @@ jest.mock('react-native/Libraries/Share/Share', () => ({
   },
 }));
 
-jest.mock('react-native/Libraries/Components/Keyboard/Keyboard', () => ({
-  __esModule: true,
-  default: {
-    addListener: jest.fn(() => ({ remove: jest.fn() })),
-    removeListener: jest.fn(),
-    removeAllListeners: jest.fn(),
-    dismiss: jest.fn(),
-    scheduleLayoutAnimation: jest.fn(),
-    isVisible: jest.fn(() => false),
-    metrics: jest.fn(() => null),
-  },
-}));
+jest.mock('react-native/Libraries/Components/Keyboard/Keyboard', () => {
+  const RESTING = { visible: false, height: 0 };
+  let visible = RESTING.visible;
+  let height = RESTING.height;
+  const listeners = new Map();
+
+  const notify = (event, payload) => {
+    const handlers = listeners.get(event);
+    if (handlers) handlers.forEach((handler) => handler(payload));
+  };
+  const rest = () => {
+    visible = RESTING.visible;
+    height = RESTING.height;
+  };
+  const frame = () => {
+    const window = require('react-native/Libraries/Utilities/Dimensions').default.get('window');
+    return { screenX: 0, screenY: window.height - height, width: window.width, height };
+  };
+  const hide = () => {
+    rest();
+    notify('keyboardDidHide', {});
+  };
+  const reset = () => {
+    rest();
+    listeners.clear();
+  };
+  global.__vrnRegisterStateful('Keyboard', reset);
+
+  return {
+    __esModule: true,
+    default: {
+      addListener: jest.fn((event, handler) => {
+        if (!listeners.has(event)) listeners.set(event, new Set());
+        listeners.get(event).add(handler);
+        return { remove: () => listeners.get(event) && listeners.get(event).delete(handler) };
+      }),
+      removeListener: jest.fn((event, handler) => {
+        if (listeners.get(event)) listeners.get(event).delete(handler);
+      }),
+      removeAllListeners: jest.fn((event) => {
+        if (event) listeners.delete(event);
+        else listeners.clear();
+      }),
+      dismiss: jest.fn(hide),
+      scheduleLayoutAnimation: jest.fn(),
+      isVisible: jest.fn(() => visible),
+      metrics: jest.fn(() => (visible ? frame() : null)),
+      _show: (next = 336) => {
+        visible = true;
+        height = next;
+        notify('keyboardDidShow', { endCoordinates: frame() });
+      },
+      _hide: hide,
+      _reset: reset,
+    },
+  };
+});
 
 jest.mock('react-native/Libraries/LayoutAnimation/LayoutAnimation', () => ({
   __esModule: true,
@@ -595,12 +670,30 @@ jest.mock(
   }),
 );
 
-jest.mock('react-native/Libraries/Utilities/Appearance', () => ({
-  __esModule: true,
-  getColorScheme: jest.fn(() => 'light'),
-  setColorScheme: jest.fn(),
-  addChangeListener: jest.fn(() => ({ remove: jest.fn() })),
-}));
+jest.mock('react-native/Libraries/Utilities/Appearance', () => {
+  const RESTING = 'light';
+  let scheme = RESTING;
+  const listeners = new Set();
+  const reset = () => {
+    scheme = RESTING;
+    listeners.clear();
+  };
+  global.__vrnRegisterStateful('Appearance', reset);
+
+  return {
+    __esModule: true,
+    getColorScheme: jest.fn(() => scheme),
+    setColorScheme: jest.fn((next) => {
+      scheme = next === 'light' || next === 'dark' ? next : RESTING;
+      listeners.forEach((listener) => listener({ colorScheme: scheme }));
+    }),
+    addChangeListener: jest.fn((listener) => {
+      listeners.add(listener);
+      return { remove: () => listeners.delete(listener) };
+    }),
+    _reset: reset,
+  };
+});
 
 jest.mock('react-native/Libraries/Utilities/useWindowDimensions', () => ({
   __esModule: true,
@@ -612,7 +705,8 @@ jest.mock('react-native/Libraries/Utilities/useWindowDimensions', () => ({
 
 jest.mock('react-native/Libraries/Utilities/useColorScheme', () => ({
   __esModule: true,
-  default: jest.fn(() => 'light'),
+  // Reads Appearance when called, so the hook and getColorScheme() agree.
+  default: jest.fn(() => require('react-native/Libraries/Utilities/Appearance').getColorScheme()),
 }));
 
 // Animated API
