@@ -21,7 +21,10 @@ global.__DEV__ = true;
 global.IS_REACT_ACT_ENVIRONMENT = true;
 global.IS_REACT_NATIVE_TEST_ENVIRONMENT = true;
 global.nativeFabricUIManager = {};
-global.window = global;
+// Only when there is no window, so a browser-like environment keeps its own.
+if (global.window === undefined) {
+  global.window = global;
+}
 global.cancelAnimationFrame = (id) => clearTimeout(id);
 global.requestAnimationFrame = (callback) =>
   setTimeout(() => callback(Date.now()), 0);
@@ -343,8 +346,10 @@ jest.mock('react-native/Libraries/Utilities/Platform', () => {
     constants: {
       reactNativeVersion: { major: 0, minor: 83, patch: 0 },
     },
+    // Reads Platform.OS at call time. Key presence (`in`), not `??`, matching
+    // React Native's own Platform.ios.js.
     select: (obj) => {
-      if ('ios' in obj) return obj.ios;
+      if (Platform.OS in obj) return obj[Platform.OS];
       if ('native' in obj) return obj.native;
       return obj.default;
     },
@@ -374,24 +379,44 @@ jest.mock('react-native/Libraries/StyleSheet/StyleSheet', () => {
   return { __esModule: true, default: StyleSheet, ...StyleSheet };
 });
 
-jest.mock('react-native/Libraries/Utilities/Dimensions', () => ({
-  __esModule: true,
-  default: {
-    get: (dim) => {
-      if (dim === 'window' || dim === 'screen')
-        return { width: 750, height: 1334, scale: 2, fontScale: 2 };
-      return {};
+jest.mock('react-native/Libraries/Utilities/Dimensions', () => {
+  const DEFAULTS = {
+    window: { width: 750, height: 1334, scale: 2, fontScale: 1 },
+    screen: { width: 750, height: 1334, scale: 2, fontScale: 1 },
+  };
+  const state = { window: { ...DEFAULTS.window }, screen: { ...DEFAULTS.screen } };
+  const listeners = new Set();
+  const has = (dim) => Object.prototype.hasOwnProperty.call(state, dim);
+  const snapshot = () => ({ window: { ...state.window }, screen: { ...state.screen } });
+
+  return {
+    __esModule: true,
+    default: {
+      get: jest.fn((dim) => (has(dim) ? { ...state[dim] } : {})),
+      set: jest.fn((dims) => {
+        for (const dim of Object.keys(dims || {})) {
+          if (has(dim) && dims[dim]) Object.assign(state[dim], dims[dim]);
+        }
+        listeners.forEach((listener) => listener(snapshot()));
+      }),
+      addEventListener: jest.fn((type, handler) => {
+        listeners.add(handler);
+        return { remove: () => listeners.delete(handler) };
+      }),
+      _reset: () => {
+        Object.assign(state.window, DEFAULTS.window);
+        Object.assign(state.screen, DEFAULTS.screen);
+        listeners.clear();
+      },
     },
-    set: jest.fn(),
-    addEventListener: jest.fn(() => ({ remove: jest.fn() })),
-  },
-}));
+  };
+});
 
 jest.mock('react-native/Libraries/Utilities/PixelRatio', () => ({
   __esModule: true,
   default: {
     get: () => 2,
-    getFontScale: () => 2,
+    getFontScale: () => 1,
     getPixelSizeForLayoutSize: (size) => size * 2,
     roundToNearestPixel: (size) => Math.round(size * 2) / 2,
   },
@@ -579,12 +604,10 @@ jest.mock('react-native/Libraries/Utilities/Appearance', () => ({
 
 jest.mock('react-native/Libraries/Utilities/useWindowDimensions', () => ({
   __esModule: true,
-  default: jest.fn(() => ({
-    width: 750,
-    height: 1334,
-    scale: 2,
-    fontScale: 2,
-  })),
+  // Reads Dimensions when called, so the hook and Dimensions.get('window') agree.
+  default: jest.fn(() =>
+    require('react-native/Libraries/Utilities/Dimensions').default.get('window')
+  ),
 }));
 
 jest.mock('react-native/Libraries/Utilities/useColorScheme', () => ({
