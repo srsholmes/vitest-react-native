@@ -169,6 +169,25 @@ describe('AppState', () => {
     const sub = AppState.addEventListener('change', handler);
     expect(sub).toBeDefined();
     expect(typeof sub.remove).toBe('function');
+    sub.remove();
+  });
+
+  test('_setState changes currentState and notifies change listeners', () => {
+    const appState = AppState as unknown as {
+      _setState: (state: string) => void;
+      _reset: () => void;
+    };
+    const handler = fn();
+    const sub = AppState.addEventListener('change', handler);
+    try {
+      appState._setState('background');
+
+      expect(AppState.currentState).toBe('background');
+      expect(handler).toHaveBeenCalledWith('background');
+    } finally {
+      sub.remove();
+      appState._reset();
+    }
   });
 });
 
@@ -236,6 +255,26 @@ describe('Keyboard', () => {
     const sub = Keyboard.addListener('keyboardDidShow', fn());
     expect(sub).toBeDefined();
     expect(typeof sub.remove).toBe('function');
+    sub.remove();
+  });
+
+  test('_show makes the keyboard visible and notifies listeners', () => {
+    const keyboard = Keyboard as unknown as {
+      _show: (height?: number) => void;
+      _reset: () => void;
+    };
+    const handler = fn();
+    const sub = Keyboard.addListener('keyboardDidShow', handler);
+    try {
+      keyboard._show(336);
+
+      expect(Keyboard.isVisible()).toBe(true);
+      expect(Keyboard.metrics()).toMatchObject({ height: 336 });
+      expect(handler).toHaveBeenCalledTimes(1);
+    } finally {
+      sub.remove();
+      keyboard._reset();
+    }
   });
 });
 
@@ -396,6 +435,23 @@ describe('Appearance', () => {
     const sub = Appearance.addChangeListener(fn());
     expect(sub).toBeDefined();
     expect(typeof sub.remove).toBe('function');
+    sub.remove();
+  });
+
+  test('setColorScheme drives getColorScheme, the hook and listeners', () => {
+    const appearance = Appearance as unknown as { _reset: () => void };
+    const handler = fn();
+    const sub = Appearance.addChangeListener(handler);
+    try {
+      Appearance.setColorScheme('dark');
+
+      expect(Appearance.getColorScheme()).toBe('dark');
+      expect(useColorScheme()).toBe('dark');
+      expect(handler).toHaveBeenCalledTimes(1);
+    } finally {
+      sub.remove();
+      appearance._reset();
+    }
   });
 });
 

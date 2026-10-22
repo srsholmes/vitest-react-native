@@ -6,7 +6,7 @@ import { rmSync } from 'fs';
 rmSync('./dist', { recursive: true, force: true });
 
 const shared = {
-  entryPoints: ['src/plugin.ts', 'src/setup.ts'],
+  entryPoints: ['src/plugin.ts', 'src/setup.ts', 'src/helpers.ts'],
   bundle: true,
   sourcemap: true,
   platform: 'node',
