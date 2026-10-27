@@ -195,30 +195,30 @@ tracks focus state across `focus()` and `blur()`.
 
 ### APIs
 
-| API                | Status | Notes                                        |
-| ------------------ | ------ | -------------------------------------------- |
-| Animated           | ✅     | Full animation API with timing, spring, etc. |
-| StyleSheet         | ✅     | create, flatten, compose, etc.               |
-| Platform           | ✅     | OS detection, select, etc.                   |
-| Dimensions         | ✅     | get, addEventListener                        |
-| PixelRatio         | ✅     | get, getFontScale, etc.                      |
-| Linking            | ✅     | openURL, canOpenURL, etc.                    |
-| Alert              | ✅     | alert, prompt                                |
-| Share              | ✅     | share                                        |
-| Keyboard           | ✅     | dismiss, addListener, etc.                   |
-| AppState           | ✅     | currentState, addEventListener               |
-| Clipboard          | ✅     | getString, setString                         |
-| Vibration          | ✅     | vibrate, cancel                              |
-| BackHandler        | ✅     | addEventListener, exitApp                    |
-| PermissionsAndroid | ✅     | request, check, requestMultiple              |
-| ToastAndroid       | ✅     | show, showWithGravity                        |
-| ActionSheetIOS     | ✅     | showActionSheetWithOptions                   |
-| AccessibilityInfo  | ✅     | Full accessibility API                       |
-| Appearance         | ✅     | getColorScheme, addChangeListener            |
-| LayoutAnimation    | ✅     | configureNext, create, Presets               |
-| InteractionManager | ✅     | runAfterInteractions (removed in RN 0.87)    |
-| PanResponder       | ✅     | create                                       |
-| NativeEventEmitter | ✅     | addListener, removeAllListeners              |
+| API                | Status | Notes                                            |
+| ------------------ | ------ | ------------------------------------------------ |
+| Animated           | ✅     | Full animation API with timing, spring, etc.     |
+| StyleSheet         | ✅     | create, flatten, compose, etc.                   |
+| Platform           | ✅     | OS detection, select, etc.                       |
+| Dimensions         | ✅     | get, set, addEventListener (stateful)            |
+| PixelRatio         | ✅     | get, getFontScale, etc.                          |
+| Linking            | ✅     | openURL, canOpenURL, etc.                        |
+| Alert              | ✅     | alert, prompt                                    |
+| Share              | ✅     | share                                            |
+| Keyboard           | ✅     | dismiss, addListener, isVisible (stateful)       |
+| AppState           | ✅     | currentState, addEventListener (stateful)        |
+| Clipboard          | ✅     | getString, setString                             |
+| Vibration          | ✅     | vibrate, cancel                                  |
+| BackHandler        | ✅     | addEventListener, exitApp                        |
+| PermissionsAndroid | ✅     | request, check, requestMultiple                  |
+| ToastAndroid       | ✅     | show, showWithGravity                            |
+| ActionSheetIOS     | ✅     | showActionSheetWithOptions                       |
+| AccessibilityInfo  | ✅     | Full accessibility API                           |
+| Appearance         | ✅     | get/setColorScheme, addChangeListener (stateful) |
+| LayoutAnimation    | ✅     | configureNext, create, Presets                   |
+| InteractionManager | ✅     | runAfterInteractions (removed in RN 0.87)        |
+| PanResponder       | ✅     | create                                           |
+| NativeEventEmitter | ✅     | addListener, removeAllListeners                  |
 
 ### Hooks
 
@@ -226,6 +226,86 @@ tracks focus state across `focus()` and `blur()`.
 | ------------------- | ------ |
 | useWindowDimensions | ✅     |
 | useColorScheme      | ✅     |
+
+## Test helpers
+
+Import from `@srsholmes/vitest-react-native/helpers` to drive the mocks from a test.
+
+```tsx
+import { afterEach } from 'vitest';
+import {
+  setPlatform,
+  setDimensions,
+  setColorScheme,
+  mockNativeModule,
+  resetAllMocks,
+} from '@srsholmes/vitest-react-native/helpers';
+
+afterEach(() => {
+  resetAllMocks();
+});
+
+test('renders the Android layout', () => {
+  setPlatform('android');
+  // Platform.OS is 'android', and Platform.select() follows
+});
+
+test('adapts to a narrow screen', () => {
+  setDimensions({ width: 320, height: 568 });
+  // Dimensions.get('window') and useWindowDimensions() both report it,
+  // and Dimensions change listeners fire
+});
+
+test('renders in dark mode', () => {
+  setColorScheme('dark');
+  // Appearance.getColorScheme() and useColorScheme() both report 'dark'
+});
+
+test('reads from a native module', () => {
+  mockNativeModule('MyModule', { getValue: () => 42 });
+  // Visible through NativeModules.MyModule and TurboModuleRegistry.getEnforcing('MyModule')
+});
+```
+
+| Helper                                                 | What it does                                                                                                                                                                                      |
+| ------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `setPlatform('ios' \| 'android')`                      | Sets `Platform.OS` and `Version`. `Platform.select()` reads `OS` when called, so it follows.                                                                                                      |
+| `setDimensions({ width, height, scale?, fontScale? })` | Merges into the current size, so passing only `width` keeps the height. Notifies `Dimensions` change listeners, and `useWindowDimensions()` reports it.                                           |
+| `setColorScheme('light' \| 'dark' \| 'auto')`          | Sets the scheme and notifies `Appearance` change listeners. `useColorScheme()` reads through `Appearance`, so it follows. `'auto'` returns to `'light'`: there is no system appearance to follow. |
+| `mockNativeModule(name, impl)`                         | Stands in for a native module, reaching both `NativeModules[name]` and `TurboModuleRegistry.get`/`getEnforcing`.                                                                                  |
+| `resetAllMocks()`                                      | Restores every stateful mock to its resting values and drops registered listeners and native-module stand-ins.                                                                                    |
+
+Helpers must be imported from a test file, where the plugin's require hook is active —
+importing them from a config file or plain Node will fail on React Native's Flow syntax.
+
+### Simulating events
+
+The stateful mocks expose their own hooks for events a device would raise. These are not
+part of React Native's API, so they are prefixed with `_`:
+
+```tsx
+import { Keyboard, AppState, Dimensions } from 'react-native';
+
+(Keyboard as any)._show(336); // fires keyboardDidShow listeners
+(Keyboard as any)._hide(); // fires keyboardDidHide listeners
+(AppState as any)._setState('background'); // fires 'change' listeners
+Dimensions.set({ window: { width: 500, height: 900 } }); // fires change listeners
+```
+
+Every one of them is undone by `resetAllMocks()`, and each stateful mock also exposes
+`_reset()` individually.
+
+### What `resetAllMocks()` does not do
+
+It does not clear spy call history. Vitest already owns that through its own `clearMocks`
+and `mockReset` options, and resetting implementations here would drop the ones the mocks
+were built with:
+
+```ts
+export default defineConfig({
+  test: { clearMocks: true }, // for call history
+});
+```
 
 ## Example Test Patterns
 

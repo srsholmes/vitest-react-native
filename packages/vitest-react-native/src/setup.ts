@@ -20,8 +20,14 @@
 //
 // This eliminates the whack-a-mole pattern where each RN update adds a new
 // module/method/flag that crashes until setup.ts is manually updated.
+// Native-module stand-ins installed by the mockNativeModule() helper. Consulted by the
+// proxy below, which is the single chokepoint feeding both __turboModuleProxy and
+// nativeModuleProxy — so one map reaches TurboModuleRegistry and NativeModules alike.
+const nativeModuleOverrides = new Map<string, unknown>();
+
 const createTurboModuleProxy = () => {
   return (name: string) => {
+    if (nativeModuleOverrides.has(name)) return nativeModuleOverrides.get(name);
     if (name === 'NativeReactNativeFeatureFlagsCxx') {
       // Feature flags: any prop returns () => false
       return new Proxy(
@@ -70,6 +76,18 @@ g.__vrnHostInstance = (): Record<string, unknown> => ({
   focus: vi.fn(),
   blur: vi.fn(),
 });
+
+// Reset hooks for the mocks that hold state, registered by each mock as it initialises.
+// resetAllMocks() sweeps this instead of carrying a hand-maintained list, which is the
+// kind that quietly falls behind the moment a stateful mock is added. Populated lazily,
+// which is correct: a mock that never loaded holds no state to reset.
+const statefulMocks = new Map<string, () => void>();
+g.__vrnStateful = statefulMocks;
+g.__vrnRegisterStateful = (name: string, reset: () => void): void => {
+  statefulMocks.set(name, reset);
+};
+g.__vrnNativeModuleOverrides = nativeModuleOverrides;
+statefulMocks.set('NativeModules', () => nativeModuleOverrides.clear());
 // Only when there is no window: assigning unconditionally replaced jsdom's window
 // with globalThis for anyone running a browser-like environment.
 if (g.window === undefined) {
@@ -589,9 +607,11 @@ mock(
 mock(
   'react-native/Libraries/Utilities/Platform',
   () => `(() => {
+  // One source for the initial values and the reset hook below.
+  const RESTING = { OS: 'ios', Version: '17.0' };
   const Platform = {
-    OS: 'ios',
-    Version: '17.0',
+    OS: RESTING.OS,
+    Version: RESTING.Version,
     isPad: false,
     isTesting: true,
     isTV: false,
@@ -611,6 +631,11 @@ mock(
       return obj.default;
     },
   };
+  global.__vrnRegisterStateful('Platform', () => {
+    Platform.OS = RESTING.OS;
+    Platform.Version = RESTING.Version;
+  });
+
   // The spread copies OS by value onto the module namespace, so select() follows
   // mutations made through the default export (what \`import { Platform }\` and RN's
   // internals use) but not through \`require(...).OS\`. The default export is the
@@ -656,107 +681,120 @@ mock(
 // NativeModules
 mock(
   'react-native/Libraries/BatchedBridge/NativeModules',
-  () => `{
-  __esModule: true,
-  default: {
-    AlertManager: { alertWithArgs: vi.fn() },
-    AsyncLocalStorage: {
-      multiGet: vi.fn((keys, cb) => process.nextTick(() => cb(null, []))),
-      multiSet: vi.fn((entries, cb) => process.nextTick(() => cb(null))),
-      multiRemove: vi.fn((keys, cb) => process.nextTick(() => cb(null))),
-      multiMerge: vi.fn((entries, cb) => process.nextTick(() => cb(null))),
-      clear: vi.fn((cb) => process.nextTick(() => cb(null))),
-      getAllKeys: vi.fn((cb) => process.nextTick(() => cb(null, []))),
-    },
-    DeviceInfo: {
-      getConstants: () => ({
-        Dimensions: {
-          window: { fontScale: 1, height: 1334, scale: 2, width: 750 },
-          screen: { fontScale: 1, height: 1334, scale: 2, width: 750 },
-        },
-      }),
-    },
-    DevSettings: { addMenuItem: vi.fn(), reload: vi.fn() },
-    ImageLoader: {
-      getSize: vi.fn(() => Promise.resolve([320, 240])),
-      getSizeWithHeaders: vi.fn(() => Promise.resolve({ width: 320, height: 240 })),
-      prefetchImage: vi.fn(() => Promise.resolve()),
-      prefetchImageWithMetadata: vi.fn(() => Promise.resolve()),
-      queryCache: vi.fn(() => Promise.resolve({})),
-    },
-    ImageViewManager: {
-      getSize: vi.fn((uri, success) => process.nextTick(() => success(320, 240))),
-      prefetchImage: vi.fn(),
-    },
-    KeyboardObserver: { addListener: vi.fn(), removeListeners: vi.fn() },
-    NativeAnimatedModule: {
-      createAnimatedNode: vi.fn(),
-      updateAnimatedNodeConfig: vi.fn(),
-      getValue: vi.fn(),
-      startListeningToAnimatedNodeValue: vi.fn(),
-      stopListeningToAnimatedNodeValue: vi.fn(),
-      connectAnimatedNodes: vi.fn(),
-      disconnectAnimatedNodes: vi.fn(),
-      startAnimatingNode: vi.fn((animationId, nodeTag, config, endCallback) => {
-        setTimeout(() => endCallback({ finished: true }), 16);
-      }),
-      stopAnimation: vi.fn(),
-      setAnimatedNodeValue: vi.fn(),
-      setAnimatedNodeOffset: vi.fn(),
-      flattenAnimatedNodeOffset: vi.fn(),
-      extractAnimatedNodeOffset: vi.fn(),
-      connectAnimatedNodeToView: vi.fn(),
-      disconnectAnimatedNodeFromView: vi.fn(),
-      restoreDefaultValues: vi.fn(),
-      dropAnimatedNode: vi.fn(),
-      addAnimatedEventToView: vi.fn(),
-      removeAnimatedEventFromView: vi.fn(),
-      addListener: vi.fn(),
-      removeListener: vi.fn(),
-      removeListeners: vi.fn(),
-    },
-    Networking: { sendRequest: vi.fn(), abortRequest: vi.fn(), addListener: vi.fn(), removeListeners: vi.fn() },
-    PlatformConstants: {
-      getConstants: () => ({ isTesting: true, reactNativeVersion: ${rnVersionLiteral} }),
-    },
-    SourceCode: { getConstants: () => ({ scriptURL: null }) },
-    StatusBarManager: {
-      setColor: vi.fn(),
-      setStyle: vi.fn(),
-      setHidden: vi.fn(),
-      setNetworkActivityIndicatorVisible: vi.fn(),
-      setBackgroundColor: vi.fn(),
-      setTranslucent: vi.fn(),
-      getConstants: () => ({ HEIGHT: 42, DEFAULT_BACKGROUND_COLOR: 0 }),
-    },
-    Timing: { createTimer: vi.fn(), deleteTimer: vi.fn() },
-    UIManager: {},
-    BlobModule: {
-      getConstants: () => ({ BLOB_URI_SCHEME: 'content', BLOB_URI_HOST: null }),
-      addNetworkingHandler: vi.fn(),
-      enableBlobSupport: vi.fn(),
-      disableBlobSupport: vi.fn(),
-      createFromParts: vi.fn(),
-      sendBlob: vi.fn(),
-      release: vi.fn(),
-    },
-    WebSocketModule: {
-      connect: vi.fn(),
-      send: vi.fn(),
-      sendBinary: vi.fn(),
-      ping: vi.fn(),
-      close: vi.fn(),
-      addListener: vi.fn(),
-      removeListeners: vi.fn(),
-    },
-    I18nManager: {
-      allowRTL: vi.fn(),
-      forceRTL: vi.fn(),
-      swapLeftAndRightInRTL: vi.fn(),
-      getConstants: () => ({ isRTL: false, doLeftAndRightSwapInRTL: true, localeIdentifier: 'en_US' }),
-    },
+  () => `(() => {
+  const base = {
+  AlertManager: { alertWithArgs: vi.fn() },
+  AsyncLocalStorage: {
+    multiGet: vi.fn((keys, cb) => process.nextTick(() => cb(null, []))),
+    multiSet: vi.fn((entries, cb) => process.nextTick(() => cb(null))),
+    multiRemove: vi.fn((keys, cb) => process.nextTick(() => cb(null))),
+    multiMerge: vi.fn((entries, cb) => process.nextTick(() => cb(null))),
+    clear: vi.fn((cb) => process.nextTick(() => cb(null))),
+    getAllKeys: vi.fn((cb) => process.nextTick(() => cb(null, []))),
   },
-}`
+  DeviceInfo: {
+    getConstants: () => ({
+      Dimensions: {
+        window: { fontScale: 1, height: 1334, scale: 2, width: 750 },
+        screen: { fontScale: 1, height: 1334, scale: 2, width: 750 },
+      },
+    }),
+  },
+  DevSettings: { addMenuItem: vi.fn(), reload: vi.fn() },
+  ImageLoader: {
+    getSize: vi.fn(() => Promise.resolve([320, 240])),
+    getSizeWithHeaders: vi.fn(() => Promise.resolve({ width: 320, height: 240 })),
+    prefetchImage: vi.fn(() => Promise.resolve()),
+    prefetchImageWithMetadata: vi.fn(() => Promise.resolve()),
+    queryCache: vi.fn(() => Promise.resolve({})),
+  },
+  ImageViewManager: {
+    getSize: vi.fn((uri, success) => process.nextTick(() => success(320, 240))),
+    prefetchImage: vi.fn(),
+  },
+  KeyboardObserver: { addListener: vi.fn(), removeListeners: vi.fn() },
+  NativeAnimatedModule: {
+    createAnimatedNode: vi.fn(),
+    updateAnimatedNodeConfig: vi.fn(),
+    getValue: vi.fn(),
+    startListeningToAnimatedNodeValue: vi.fn(),
+    stopListeningToAnimatedNodeValue: vi.fn(),
+    connectAnimatedNodes: vi.fn(),
+    disconnectAnimatedNodes: vi.fn(),
+    startAnimatingNode: vi.fn((animationId, nodeTag, config, endCallback) => {
+      setTimeout(() => endCallback({ finished: true }), 16);
+    }),
+    stopAnimation: vi.fn(),
+    setAnimatedNodeValue: vi.fn(),
+    setAnimatedNodeOffset: vi.fn(),
+    flattenAnimatedNodeOffset: vi.fn(),
+    extractAnimatedNodeOffset: vi.fn(),
+    connectAnimatedNodeToView: vi.fn(),
+    disconnectAnimatedNodeFromView: vi.fn(),
+    restoreDefaultValues: vi.fn(),
+    dropAnimatedNode: vi.fn(),
+    addAnimatedEventToView: vi.fn(),
+    removeAnimatedEventFromView: vi.fn(),
+    addListener: vi.fn(),
+    removeListener: vi.fn(),
+    removeListeners: vi.fn(),
+  },
+  Networking: { sendRequest: vi.fn(), abortRequest: vi.fn(), addListener: vi.fn(), removeListeners: vi.fn() },
+  PlatformConstants: {
+    getConstants: () => ({ isTesting: true, reactNativeVersion: ${rnVersionLiteral} }),
+  },
+  SourceCode: { getConstants: () => ({ scriptURL: null }) },
+  StatusBarManager: {
+    setColor: vi.fn(),
+    setStyle: vi.fn(),
+    setHidden: vi.fn(),
+    setNetworkActivityIndicatorVisible: vi.fn(),
+    setBackgroundColor: vi.fn(),
+    setTranslucent: vi.fn(),
+    getConstants: () => ({ HEIGHT: 42, DEFAULT_BACKGROUND_COLOR: 0 }),
+  },
+  Timing: { createTimer: vi.fn(), deleteTimer: vi.fn() },
+  UIManager: {},
+  BlobModule: {
+    getConstants: () => ({ BLOB_URI_SCHEME: 'content', BLOB_URI_HOST: null }),
+    addNetworkingHandler: vi.fn(),
+    enableBlobSupport: vi.fn(),
+    disableBlobSupport: vi.fn(),
+    createFromParts: vi.fn(),
+    sendBlob: vi.fn(),
+    release: vi.fn(),
+  },
+  WebSocketModule: {
+    connect: vi.fn(),
+    send: vi.fn(),
+    sendBinary: vi.fn(),
+    ping: vi.fn(),
+    close: vi.fn(),
+    addListener: vi.fn(),
+    removeListeners: vi.fn(),
+  },
+  I18nManager: {
+    allowRTL: vi.fn(),
+    forceRTL: vi.fn(),
+    swapLeftAndRightInRTL: vi.fn(),
+    getConstants: () => ({ isRTL: false, doLeftAndRightSwapInRTL: true, localeIdentifier: 'en_US' }),
+  },
+  };
+  const overrides = global.__vrnNativeModuleOverrides;
+
+  return {
+    __esModule: true,
+    // A Proxy, so a mockNativeModule() stand-in is visible here as well as through
+    // TurboModuleRegistry. Nothing is written into the base object, so clearing the
+    // override map is all a reset has to do.
+    default: new Proxy(base, {
+      get: (target, prop) =>
+        typeof prop === 'string' && overrides.has(prop) ? overrides.get(prop) : target[prop],
+      has: (target, prop) =>
+        (typeof prop === 'string' && overrides.has(prop)) || prop in target,
+    }),
+  };
+})()`
 );
 
 // NativeComponentRegistry
@@ -1206,6 +1244,12 @@ mock(
   const listeners = new Set();
   const has = (dim) => Object.prototype.hasOwnProperty.call(state, dim);
   const snapshot = () => ({ window: { ...state.window }, screen: { ...state.screen } });
+  const reset = () => {
+    Object.assign(state.window, DEFAULTS.window);
+    Object.assign(state.screen, DEFAULTS.screen);
+    listeners.clear();
+  };
+  global.__vrnRegisterStateful('Dimensions', reset);
 
   return {
     __esModule: true,
@@ -1225,11 +1269,7 @@ mock(
       }),
       // Not part of React Native's API: the mock's own hook for restoring the resting
       // state between tests.
-      _reset: () => {
-        Object.assign(state.window, DEFAULTS.window);
-        Object.assign(state.screen, DEFAULTS.screen);
-        listeners.clear();
-      },
+      _reset: reset,
     },
   };
 })()`
@@ -1252,14 +1292,41 @@ mock(
 // AppState
 mock(
   'react-native/Libraries/AppState/AppState',
-  () => `{
-  __esModule: true,
-  default: {
-    addEventListener: vi.fn(() => ({ remove: vi.fn() })),
-    currentState: 'active',
-    isAvailable: true,
-  },
-}`
+  () => `(() => {
+  const RESTING = 'active';
+  let current = RESTING;
+  const listeners = new Map();
+  const reset = () => {
+    current = RESTING;
+    listeners.clear();
+  };
+  global.__vrnRegisterStateful('AppState', reset);
+
+  return {
+    __esModule: true,
+    default: {
+      addEventListener: vi.fn((event, handler) => {
+        if (!listeners.has(event)) listeners.set(event, new Set());
+        listeners.get(event).add(handler);
+        return { remove: () => listeners.get(event) && listeners.get(event).delete(handler) };
+      }),
+      // A getter, because React Native exposes currentState as a property to read.
+      // As a plain value it could not reflect _setState().
+      get currentState() {
+        return current;
+      },
+      isAvailable: true,
+      // Not part of React Native's API. Fires 'change' handlers only: 'focus' and
+      // 'blur' are Android window-focus events, not app-state transitions.
+      _setState: (next) => {
+        current = next;
+        const handlers = listeners.get('change');
+        if (handlers) handlers.forEach((handler) => handler(next));
+      },
+      _reset: reset,
+    },
+  };
+})()`
 );
 
 // Linking
@@ -1367,18 +1434,70 @@ mock(
 // Keyboard
 mock(
   'react-native/Libraries/Components/Keyboard/Keyboard',
-  () => `{
-  __esModule: true,
-  default: {
-    addListener: vi.fn(() => ({ remove: vi.fn() })),
-    removeListener: vi.fn(),
-    removeAllListeners: vi.fn(),
-    dismiss: vi.fn(),
-    scheduleLayoutAnimation: vi.fn(),
-    isVisible: vi.fn(() => false),
-    metrics: vi.fn(() => null),
-  },
-}`
+  () => `(() => {
+  // One source for the resting state and _reset(). Kept as a constant because suites
+  // call _reset() before asserting, so a wrong construction-time value would pass
+  // every gate.
+  const RESTING = { visible: false, height: 0 };
+  let visible = RESTING.visible;
+  let height = RESTING.height;
+  const listeners = new Map();
+
+  const notify = (event, payload) => {
+    const handlers = listeners.get(event);
+    if (handlers) handlers.forEach((handler) => handler(payload));
+  };
+  const rest = () => {
+    visible = RESTING.visible;
+    height = RESTING.height;
+  };
+  // Read from Dimensions so the keyboard's frame matches the device the mocks describe.
+  const frame = () => {
+    const window = require('react-native/Libraries/Utilities/Dimensions').default.get('window');
+    return { screenX: 0, screenY: window.height - height, width: window.width, height };
+  };
+  const hide = () => {
+    rest();
+    notify('keyboardDidHide', {});
+  };
+  const reset = () => {
+    rest();
+    listeners.clear();
+  };
+  global.__vrnRegisterStateful('Keyboard', reset);
+
+  return {
+    __esModule: true,
+    default: {
+      addListener: vi.fn((event, handler) => {
+        if (!listeners.has(event)) listeners.set(event, new Set());
+        listeners.get(event).add(handler);
+        return { remove: () => listeners.get(event) && listeners.get(event).delete(handler) };
+      }),
+      removeListener: vi.fn((event, handler) => {
+        if (listeners.get(event)) listeners.get(event).delete(handler);
+      }),
+      removeAllListeners: vi.fn((event) => {
+        if (event) listeners.delete(event);
+        else listeners.clear();
+      }),
+      // Dismissing hides the keyboard, as it does on a device.
+      dismiss: vi.fn(hide),
+      scheduleLayoutAnimation: vi.fn(),
+      isVisible: vi.fn(() => visible),
+      // null when hidden, matching real React Native — not undefined, not {}.
+      metrics: vi.fn(() => (visible ? frame() : null)),
+      // Not part of React Native's API: the mock's own simulation hooks.
+      _show: (next = 336) => {
+        visible = true;
+        height = next;
+        notify('keyboardDidShow', { endCoordinates: frame() });
+      },
+      _hide: hide,
+      _reset: reset,
+    },
+  };
+})()`
 );
 
 // LayoutAnimation
@@ -1837,12 +1956,37 @@ mock(
 // Appearance - uses named exports, not default
 mock(
   'react-native/Libraries/Utilities/Appearance',
-  () => `{
-  __esModule: true,
-  getColorScheme: vi.fn(() => 'light'),
-  setColorScheme: vi.fn(),
-  addChangeListener: vi.fn(() => ({ remove: vi.fn() })),
-}`
+  () => `(() => {
+  // The one owner of the colour scheme. NativeAppearance and useColorScheme both read
+  // through this module, so the three cannot disagree.
+  const RESTING = 'light';
+  let scheme = RESTING;
+  const listeners = new Set();
+  const reset = () => {
+    scheme = RESTING;
+    listeners.clear();
+  };
+  global.__vrnRegisterStateful('Appearance', reset);
+
+  return {
+    __esModule: true,
+    getColorScheme: vi.fn(() => scheme),
+    // React Native takes 'light' | 'dark' | 'auto' | 'unspecified' here, while
+    // getColorScheme() only ever returns 'light' | 'dark' | null. With no system
+    // appearance to follow, the override keywords resolve to the resting scheme rather
+    // than being stored and handed back as themselves.
+    setColorScheme: vi.fn((next) => {
+      scheme = next === 'light' || next === 'dark' ? next : RESTING;
+      listeners.forEach((listener) => listener({ colorScheme: scheme }));
+    }),
+    addChangeListener: vi.fn((listener) => {
+      listeners.add(listener);
+      return { remove: () => listeners.delete(listener) };
+    }),
+    // Not part of React Native's API: the mock's own hook for the resting state.
+    _reset: reset,
+  };
+})()`
 );
 
 // NativeAppearance
@@ -1851,8 +1995,14 @@ mock(
   () => `{
   __esModule: true,
   default: {
-    getColorScheme: vi.fn(() => 'light'),
-    setColorScheme: vi.fn(),
+    // Delegates to the Appearance mock. Holding its own scheme meant the two reported
+    // different values the moment either was changed.
+    getColorScheme: vi.fn(() =>
+      require('react-native/Libraries/Utilities/Appearance').getColorScheme()
+    ),
+    setColorScheme: vi.fn((next) =>
+      require('react-native/Libraries/Utilities/Appearance').setColorScheme(next)
+    ),
     addListener: vi.fn(),
     removeListeners: vi.fn(),
   },
@@ -1864,7 +2014,12 @@ mock(
   'react-native/Libraries/Utilities/useColorScheme',
   () => `{
   __esModule: true,
-  default: vi.fn(() => 'light'),
+  // Reads Appearance when called, so the hook and Appearance.getColorScheme() cannot
+  // disagree. Deliberately not a real subscription — Appearance.spec.tsx calls this
+  // outside a component, so useState/useEffect here would throw "invalid hook call".
+  default: vi.fn(() =>
+    require('react-native/Libraries/Utilities/Appearance').getColorScheme()
+  ),
 }`
 );
 
@@ -1937,7 +2092,9 @@ mock(
       this.listeners = {};
     }
   }
-  return { __esModule: true, default: new DeviceEventEmitter() };
+  const instance = new DeviceEventEmitter();
+  global.__vrnRegisterStateful('DeviceEventEmitter', () => instance._reset());
+  return { __esModule: true, default: instance };
 })()`
 );
 

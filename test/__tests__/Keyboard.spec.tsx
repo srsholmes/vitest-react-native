@@ -1,9 +1,20 @@
-import { test, expect, describe, vi, beforeEach } from 'vitest';
+import { test, expect, describe, vi, beforeEach, afterEach } from 'vitest';
 import { Keyboard } from 'react-native';
+
+// _show/_hide/_reset are the mock's own hooks, not part of React Native's API.
+const keyboard = Keyboard as typeof Keyboard & {
+  _show: (height?: number) => void;
+  _hide: () => void;
+  _reset: () => void;
+};
 
 describe('Keyboard', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+  });
+
+  afterEach(() => {
+    keyboard._reset();
   });
 
   test('addListener is callable', () => {
@@ -72,6 +83,73 @@ describe('Keyboard', () => {
     const callback = vi.fn();
     const subscription = Keyboard.addListener('keyboardDidShow', callback);
     expect(() => subscription.remove()).not.toThrow();
+  });
+
+  test('_show makes the keyboard visible and reports metrics', () => {
+    keyboard._show(336);
+
+    expect(Keyboard.isVisible()).toBe(true);
+    expect(Keyboard.metrics()).toMatchObject({ height: 336 });
+  });
+
+  test('_show notifies keyboardDidShow listeners with the end coordinates', () => {
+    const callback = vi.fn();
+    Keyboard.addListener('keyboardDidShow', callback);
+
+    keyboard._show(336);
+
+    expect(callback).toHaveBeenCalledTimes(1);
+    expect(callback.mock.calls[0][0].endCoordinates.height).toBe(336);
+  });
+
+  test('_hide makes the keyboard hidden and notifies keyboardDidHide', () => {
+    const callback = vi.fn();
+    Keyboard.addListener('keyboardDidHide', callback);
+    keyboard._show(336);
+
+    keyboard._hide();
+
+    expect(Keyboard.isVisible()).toBe(false);
+    expect(Keyboard.metrics()).toBeNull();
+    expect(callback).toHaveBeenCalledTimes(1);
+  });
+
+  test('dismiss hides the keyboard, as it does on a device', () => {
+    const callback = vi.fn();
+    Keyboard.addListener('keyboardDidHide', callback);
+    keyboard._show(336);
+
+    Keyboard.dismiss();
+
+    expect(Keyboard.isVisible()).toBe(false);
+    expect(callback).toHaveBeenCalledTimes(1);
+  });
+
+  test('a removed listener stops receiving while others keep receiving', () => {
+    const removed = vi.fn();
+    const kept = vi.fn();
+    Keyboard.addListener('keyboardDidShow', removed).remove();
+    Keyboard.addListener('keyboardDidShow', kept);
+
+    keyboard._show(336);
+
+    expect(removed).not.toHaveBeenCalled();
+    expect(kept).toHaveBeenCalledTimes(1);
+  });
+
+  test('_reset hides the keyboard and clears listeners', () => {
+    expect(typeof keyboard._reset).toBe('function');
+    const callback = vi.fn();
+    Keyboard.addListener('keyboardDidShow', callback);
+    keyboard._show(336);
+
+    keyboard._reset();
+
+    expect(Keyboard.isVisible()).toBe(false);
+    expect(Keyboard.metrics()).toBeNull();
+    callback.mockClear();
+    keyboard._show(336);
+    expect(callback).not.toHaveBeenCalled();
   });
 
   test('all methods are defined', () => {

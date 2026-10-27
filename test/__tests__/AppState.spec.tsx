@@ -1,9 +1,19 @@
-import { test, expect, describe, vi, beforeEach } from 'vitest';
+import { test, expect, describe, vi, beforeEach, afterEach } from 'vitest';
 import { AppState } from 'react-native';
+
+// _setState/_reset are the mock's own hooks, not part of React Native's API.
+const appState = AppState as typeof AppState & {
+  _setState: (state: string) => void;
+  _reset: () => void;
+};
 
 describe('AppState', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+  });
+
+  afterEach(() => {
+    appState._reset();
   });
 
   test('currentState is defined', () => {
@@ -58,5 +68,59 @@ describe('AppState', () => {
     expect(changeSub).toBeDefined();
     expect(focusSub).toBeDefined();
     expect(blurSub).toBeDefined();
+  });
+
+  test('_setState changes currentState', () => {
+    appState._setState('background');
+
+    expect(AppState.currentState).toBe('background');
+  });
+
+  test('_setState notifies change listeners with the new state', () => {
+    const handler = vi.fn();
+    AppState.addEventListener('change', handler);
+
+    appState._setState('background');
+
+    expect(handler).toHaveBeenCalledTimes(1);
+    expect(handler).toHaveBeenCalledWith('background');
+  });
+
+  test('_setState does not notify focus or blur listeners', () => {
+    const focus = vi.fn();
+    const blur = vi.fn();
+    AppState.addEventListener('focus', focus);
+    AppState.addEventListener('blur', blur);
+
+    appState._setState('background');
+
+    expect(focus).not.toHaveBeenCalled();
+    expect(blur).not.toHaveBeenCalled();
+  });
+
+  test('a removed listener stops receiving while others keep receiving', () => {
+    const removed = vi.fn();
+    const kept = vi.fn();
+    AppState.addEventListener('change', removed).remove();
+    AppState.addEventListener('change', kept);
+
+    appState._setState('inactive');
+
+    expect(removed).not.toHaveBeenCalled();
+    expect(kept).toHaveBeenCalledTimes(1);
+  });
+
+  test('_reset restores active and clears listeners', () => {
+    expect(typeof appState._reset).toBe('function');
+    const handler = vi.fn();
+    AppState.addEventListener('change', handler);
+    appState._setState('background');
+
+    appState._reset();
+
+    expect(AppState.currentState).toBe('active');
+    handler.mockClear();
+    appState._setState('background');
+    expect(handler).not.toHaveBeenCalled();
   });
 });
