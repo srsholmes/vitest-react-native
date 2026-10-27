@@ -1,7 +1,7 @@
 import React from 'react';
 import { test, expect, describe, vi } from 'vitest';
-import { render } from '@testing-library/react-native';
-import { RefreshControl, ScrollView, Text, View } from 'react-native';
+import { fireEvent, render } from '@testing-library/react-native';
+import { FlatList, RefreshControl, ScrollView, SectionList, Text, View } from 'react-native';
 
 describe('RefreshControl Component', () => {
   test('renders correctly in ScrollView', () => {
@@ -163,5 +163,108 @@ describe('RefreshControl Component', () => {
       </View>
     );
     expect(toJSON()).toMatchSnapshot();
+  });
+
+  // The refreshControl prop was passed through but never mounted, so nothing given to it
+  // rendered: it serialised into snapshots as an unmounted element sitting in props, and
+  // none of the tests above could see it. They only ever assert the ScrollView exists.
+  describe('mounted inside its scrollable', () => {
+    const control = (
+      <RefreshControl
+        testID="refresh"
+        refreshing={true}
+        onRefresh={() => {}}
+        progressViewOffset={12}
+      />
+    );
+
+    test('ScrollView renders it', () => {
+      const { getByTestId } = render(
+        <ScrollView testID="scroll-view" refreshControl={control}>
+          <Text>Content</Text>
+        </ScrollView>
+      );
+
+      expect(getByTestId('refresh')).toBeTruthy();
+    });
+
+    test('its props survive the mount', () => {
+      const { getByTestId } = render(
+        <ScrollView refreshControl={control}>
+          <Text>Content</Text>
+        </ScrollView>
+      );
+
+      expect(getByTestId('refresh').props.refreshing).toBe(true);
+      expect(getByTestId('refresh').props.progressViewOffset).toBe(12);
+    });
+
+    test('it does not replace the scrollable children', () => {
+      const { getByTestId, getByText } = render(
+        <ScrollView testID="scroll-view" refreshControl={control}>
+          <Text>Content</Text>
+        </ScrollView>
+      );
+
+      expect(getByText('Content')).toBeTruthy();
+      expect(getByTestId('scroll-view')).toBeTruthy();
+    });
+
+    test('FlatList renders it', () => {
+      const { getByTestId } = render(
+        <FlatList
+          testID="flat-list"
+          data={['a']}
+          renderItem={({ item }) => <Text>{item}</Text>}
+          refreshControl={control}
+        />
+      );
+
+      expect(getByTestId('refresh')).toBeTruthy();
+      expect(getByTestId('flat-list')).toBeTruthy();
+    });
+
+    test('SectionList renders it', () => {
+      const { getByTestId } = render(
+        <SectionList
+          testID="section-list"
+          sections={[{ title: 'one', data: ['a'] }]}
+          renderItem={({ item }) => <Text>{item}</Text>}
+          refreshControl={control}
+        />
+      );
+
+      expect(getByTestId('refresh')).toBeTruthy();
+      expect(getByTestId('section-list')).toBeTruthy();
+    });
+
+    // The payoff: with the control in the tree there is something to fire an event on,
+    // so pull-to-refresh can finally be driven from a test.
+    test('firing refresh calls onRefresh', () => {
+      const onRefresh = vi.fn();
+      const { getByTestId } = render(
+        <ScrollView
+          refreshControl={
+            <RefreshControl testID="refresh" refreshing={false} onRefresh={onRefresh} />
+          }
+        >
+          <Text>Content</Text>
+        </ScrollView>
+      );
+
+      fireEvent(getByTestId('refresh'), 'refresh');
+
+      expect(onRefresh).toHaveBeenCalledTimes(1);
+    });
+
+    test('the element is no longer left in props', () => {
+      const { toJSON } = render(
+        <ScrollView refreshControl={control}>
+          <Text>Content</Text>
+        </ScrollView>
+      );
+
+      expect(JSON.stringify(toJSON())).not.toContain('"refreshControl"');
+    });
   });
 });
