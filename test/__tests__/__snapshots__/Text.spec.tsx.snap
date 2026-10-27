@@ -3,10 +3,8 @@
 exports[`Text Component > matches snapshot 1`] = `
 <View
   accessible={false}
-  ref={null}
 >
   <Text
-    ref={null}
     style={
       {
         "fontSize": 24,
@@ -17,7 +15,6 @@ exports[`Text Component > matches snapshot 1`] = `
     Title
   </Text>
   <Text
-    ref={null}
     style={
       {
         "color": "gray",

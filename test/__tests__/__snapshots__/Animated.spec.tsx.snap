@@ -3,7 +3,6 @@
 exports[`Animated > matches snapshot 1`] = `
 <View
   accessible={false}
-  ref={null}
   style={
     {
       "opacity": AnimatedValue {
@@ -12,9 +11,7 @@ exports[`Animated > matches snapshot 1`] = `
     }
   }
 >
-  <Text
-    ref={null}
-  >
+  <Text>
     Animated Content
   </Text>
 </View>

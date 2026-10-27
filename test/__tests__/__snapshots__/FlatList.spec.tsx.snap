@@ -3,61 +3,48 @@
 exports[`FlatList Component > matches snapshot 1`] = `
 <FlatList>
   <View>
-    <Text
-      ref={null}
-    >
+    <Text>
       Header
     </Text>
   </View>
   <View
     accessible={false}
-    ref={null}
     style={
       {
         "padding": 10,
       }
     }
   >
-    <Text
-      ref={null}
-    >
+    <Text>
       Item 1
     </Text>
   </View>
   <View
     accessible={false}
-    ref={null}
     style={
       {
         "padding": 10,
       }
     }
   >
-    <Text
-      ref={null}
-    >
+    <Text>
       Item 2
     </Text>
   </View>
   <View
     accessible={false}
-    ref={null}
     style={
       {
         "padding": 10,
       }
     }
   >
-    <Text
-      ref={null}
-    >
+    <Text>
       Item 3
     </Text>
   </View>
   <View>
-    <Text
-      ref={null}
-    >
+    <Text>
       Footer
     </Text>
   </View>

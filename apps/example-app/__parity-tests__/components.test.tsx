@@ -677,3 +677,60 @@ describe('ActionSheetIOS', () => {
     ).not.toThrow();
   });
 });
+
+// ---------------------------------------------------------------------------
+// Refs and instance methods
+// ---------------------------------------------------------------------------
+describe('refs', () => {
+  const HOST_METHODS = [
+    'measure',
+    'measureInWindow',
+    'measureLayout',
+    'setNativeProps',
+    'focus',
+    'blur',
+  ];
+
+  test('View resolves its ref with the host instance methods', () => {
+    const ref = React.createRef<Record<string, unknown>>();
+    render(<View ref={ref as never} />);
+
+    expect(ref.current).not.toBeNull();
+    for (const method of HOST_METHODS) {
+      expect(typeof ref.current?.[method]).toBe('function');
+    }
+  });
+
+  test('measure reports a layout through its callback', () => {
+    const ref = React.createRef<Record<string, unknown>>();
+    render(<View ref={ref as never} />);
+    const callback = fn();
+
+    (ref.current?.measure as (cb: unknown) => void)(callback);
+
+    expect(callback).toHaveBeenCalledTimes(1);
+  });
+
+  test('TextInput tracks focus through its ref', () => {
+    const ref = React.createRef<Record<string, unknown>>();
+    render(<TextInput ref={ref as never} />);
+    const input = ref.current as {
+      focus: () => void;
+      blur: () => void;
+      isFocused: () => boolean;
+    };
+
+    expect(input.isFocused()).toBe(false);
+    input.focus();
+    expect(input.isFocused()).toBe(true);
+    input.blur();
+    expect(input.isFocused()).toBe(false);
+  });
+
+  test('a ref is not rendered as a prop', () => {
+    const ref = React.createRef();
+    const { toJSON } = render(<View ref={ref as never} testID="root" />);
+
+    expect(JSON.stringify(toJSON())).not.toContain('"ref"');
+  });
+});

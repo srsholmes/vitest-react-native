@@ -6,11 +6,8 @@ exports[`TouchableNativeFeedback > matches snapshot 1`] = `
 >
   <View
     accessible={false}
-    ref={null}
   >
-    <Text
-      ref={null}
-    >
+    <Text>
       Native Feedback
     </Text>
   </View>

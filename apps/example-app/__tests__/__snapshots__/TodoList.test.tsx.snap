@@ -3,7 +3,6 @@
 exports[`TodoList > matches snapshot when empty 1`] = `
 <View
   accessible={false}
-  ref={null}
   style={
     {
       "backgroundColor": "#F2F2F7",
@@ -14,7 +13,6 @@ exports[`TodoList > matches snapshot when empty 1`] = `
   testID="todos"
 >
   <Text
-    ref={null}
     style={
       {
         "color": "#1C1C1E",
@@ -28,7 +26,6 @@ exports[`TodoList > matches snapshot when empty 1`] = `
   </Text>
   <View
     accessible={false}
-    ref={null}
     style={
       [
         {
@@ -45,7 +42,6 @@ exports[`TodoList > matches snapshot when empty 1`] = `
       onSubmitEditing={[Function]}
       placeholder="Add a new todo..."
       placeholderTextColor="#8E8E93"
-      ref={null}
       returnKeyType="done"
       style={
         {
@@ -69,7 +65,6 @@ exports[`TodoList > matches snapshot when empty 1`] = `
       }
       accessible={true}
       disabled={true}
-      ref={null}
       style={
         [
           {
@@ -88,7 +83,6 @@ exports[`TodoList > matches snapshot when empty 1`] = `
       testID="todos-add"
     >
       <Text
-        ref={null}
         style={
           {
             "color": "#FFFFFF",
@@ -103,7 +97,6 @@ exports[`TodoList > matches snapshot when empty 1`] = `
   </View>
   <View
     accessible={false}
-    ref={null}
     style={
       {
         "alignItems": "center",
@@ -114,7 +107,6 @@ exports[`TodoList > matches snapshot when empty 1`] = `
     }
   >
     <Text
-      ref={null}
       style={
         {
           "color": "#8E8E93",
@@ -138,7 +130,6 @@ exports[`TodoList > matches snapshot when empty 1`] = `
     testID="todos-list"
   >
     <Text
-      ref={null}
       style={
         {
           "color": "#8E8E93",
@@ -158,7 +149,6 @@ exports[`TodoList > matches snapshot when empty 1`] = `
 exports[`TodoList > matches snapshot with items 1`] = `
 <View
   accessible={false}
-  ref={null}
   style={
     {
       "backgroundColor": "#F2F2F7",
@@ -169,7 +159,6 @@ exports[`TodoList > matches snapshot with items 1`] = `
   testID="todos"
 >
   <Text
-    ref={null}
     style={
       {
         "color": "#1C1C1E",
@@ -183,7 +172,6 @@ exports[`TodoList > matches snapshot with items 1`] = `
   </Text>
   <View
     accessible={false}
-    ref={null}
     style={
       [
         {
@@ -200,7 +188,6 @@ exports[`TodoList > matches snapshot with items 1`] = `
       onSubmitEditing={[Function]}
       placeholder="Add a new todo..."
       placeholderTextColor="#8E8E93"
-      ref={null}
       returnKeyType="done"
       style={
         {
@@ -224,7 +211,6 @@ exports[`TodoList > matches snapshot with items 1`] = `
       }
       accessible={true}
       disabled={true}
-      ref={null}
       style={
         [
           {
@@ -243,7 +229,6 @@ exports[`TodoList > matches snapshot with items 1`] = `
       testID="todos-add"
     >
       <Text
-        ref={null}
         style={
           {
             "color": "#FFFFFF",
@@ -258,7 +243,6 @@ exports[`TodoList > matches snapshot with items 1`] = `
   </View>
   <View
     accessible={false}
-    ref={null}
     style={
       {
         "alignItems": "center",
@@ -269,7 +253,6 @@ exports[`TodoList > matches snapshot with items 1`] = `
     }
   >
     <Text
-      ref={null}
       style={
         {
           "color": "#8E8E93",
@@ -286,7 +269,6 @@ exports[`TodoList > matches snapshot with items 1`] = `
     <Pressable
       accessible={true}
       onPress={[Function]}
-      ref={null}
       style={
         {
           "padding": 8,
@@ -295,7 +277,6 @@ exports[`TodoList > matches snapshot with items 1`] = `
       testID="todos-clear"
     >
       <Text
-        ref={null}
         style={
           {
             "color": "#FF3B30",
@@ -350,7 +331,6 @@ exports[`TodoList > matches snapshot with items 1`] = `
           "withInitialValues": [Function],
         }
       }
-      ref={null}
       style={
         [
           {
@@ -375,7 +355,6 @@ exports[`TodoList > matches snapshot with items 1`] = `
         }
         accessible={true}
         onPress={[Function]}
-        ref={null}
         style={
           {
             "height": 24,
@@ -386,7 +365,6 @@ exports[`TodoList > matches snapshot with items 1`] = `
       >
         <View
           accessible={false}
-          ref={null}
           style={
             [
               {
@@ -404,7 +382,6 @@ exports[`TodoList > matches snapshot with items 1`] = `
         />
       </Pressable>
       <Text
-        ref={null}
         style={
           [
             {
@@ -424,7 +401,6 @@ exports[`TodoList > matches snapshot with items 1`] = `
         accessibilityRole="button"
         accessible={true}
         onPress={[Function]}
-        ref={null}
         style={
           {
             "alignItems": "center",
@@ -436,7 +412,6 @@ exports[`TodoList > matches snapshot with items 1`] = `
         testID="todos-item-0-delete"
       >
         <Text
-          ref={null}
           style={
             {
               "color": "#FF3B30",
@@ -484,7 +459,6 @@ exports[`TodoList > matches snapshot with items 1`] = `
           "withInitialValues": [Function],
         }
       }
-      ref={null}
       style={
         [
           {
@@ -509,7 +483,6 @@ exports[`TodoList > matches snapshot with items 1`] = `
         }
         accessible={true}
         onPress={[Function]}
-        ref={null}
         style={
           {
             "height": 24,
@@ -520,7 +493,6 @@ exports[`TodoList > matches snapshot with items 1`] = `
       >
         <View
           accessible={false}
-          ref={null}
           style={
             [
               {
@@ -540,7 +512,6 @@ exports[`TodoList > matches snapshot with items 1`] = `
           }
         >
           <Text
-            ref={null}
             style={
               {
                 "color": "#FFFFFF",
@@ -554,7 +525,6 @@ exports[`TodoList > matches snapshot with items 1`] = `
         </View>
       </Pressable>
       <Text
-        ref={null}
         style={
           [
             {
@@ -577,7 +547,6 @@ exports[`TodoList > matches snapshot with items 1`] = `
         accessibilityRole="button"
         accessible={true}
         onPress={[Function]}
-        ref={null}
         style={
           {
             "alignItems": "center",
@@ -589,7 +558,6 @@ exports[`TodoList > matches snapshot with items 1`] = `
         testID="todos-item-1-delete"
       >
         <Text
-          ref={null}
           style={
             {
               "color": "#FF3B30",
@@ -637,7 +605,6 @@ exports[`TodoList > matches snapshot with items 1`] = `
           "withInitialValues": [Function],
         }
       }
-      ref={null}
       style={
         [
           {
@@ -662,7 +629,6 @@ exports[`TodoList > matches snapshot with items 1`] = `
         }
         accessible={true}
         onPress={[Function]}
-        ref={null}
         style={
           {
             "height": 24,
@@ -673,7 +639,6 @@ exports[`TodoList > matches snapshot with items 1`] = `
       >
         <View
           accessible={false}
-          ref={null}
           style={
             [
               {
@@ -691,7 +656,6 @@ exports[`TodoList > matches snapshot with items 1`] = `
         />
       </Pressable>
       <Text
-        ref={null}
         style={
           [
             {
@@ -711,7 +675,6 @@ exports[`TodoList > matches snapshot with items 1`] = `
         accessibilityRole="button"
         accessible={true}
         onPress={[Function]}
-        ref={null}
         style={
           {
             "alignItems": "center",
@@ -723,7 +686,6 @@ exports[`TodoList > matches snapshot with items 1`] = `
         testID="todos-item-2-delete"
       >
         <Text
-          ref={null}
           style={
             {
               "color": "#FF3B30",

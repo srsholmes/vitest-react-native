@@ -3,7 +3,6 @@
 exports[`Counter > matches snapshot 1`] = `
 <View
   accessible={false}
-  ref={null}
   style={
     {
       "alignItems": "center",
@@ -25,7 +24,6 @@ exports[`Counter > matches snapshot 1`] = `
     accessible={true}
     disabled={false}
     onPress={[Function]}
-    ref={null}
     style={
       [
         {
@@ -42,7 +40,6 @@ exports[`Counter > matches snapshot 1`] = `
     testID="counter-decrement"
   >
     <Text
-      ref={null}
       style={
         {
           "color": "#FFFFFF",
@@ -56,7 +53,6 @@ exports[`Counter > matches snapshot 1`] = `
   </Pressable>
   <View
     accessible={false}
-    ref={null}
     style={
       [
         {
@@ -68,7 +64,6 @@ exports[`Counter > matches snapshot 1`] = `
     }
   >
     <Text
-      ref={null}
       style={
         {
           "color": "#1C1C1E",
@@ -92,7 +87,6 @@ exports[`Counter > matches snapshot 1`] = `
     accessible={true}
     disabled={false}
     onPress={[Function]}
-    ref={null}
     style={
       [
         {
@@ -109,7 +103,6 @@ exports[`Counter > matches snapshot 1`] = `
     testID="counter-increment"
   >
     <Text
-      ref={null}
       style={
         {
           "color": "#FFFFFF",
@@ -126,7 +119,6 @@ exports[`Counter > matches snapshot 1`] = `
     accessibilityRole="button"
     accessible={true}
     onPress={[Function]}
-    ref={null}
     style={
       {
         "backgroundColor": "#FF3B30",
@@ -138,7 +130,6 @@ exports[`Counter > matches snapshot 1`] = `
     testID="counter-reset"
   >
     <Text
-      ref={null}
       style={
         {
           "color": "#FFFFFF",

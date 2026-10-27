@@ -3,7 +3,6 @@
 exports[`ActivityIndicator Component > matches snapshot with all props 1`] = `
 <View
   accessible={false}
-  ref={null}
   style={
     {
       "alignItems": "center",
@@ -16,14 +15,9 @@ exports[`ActivityIndicator Component > matches snapshot with all props 1`] = `
     animating={true}
     color="#0000ff"
     hidesWhenStopped={false}
-    ref={null}
     size="large"
   />
 </View>
 `;
 
-exports[`ActivityIndicator Component > matches snapshot with default props 1`] = `
-<ActivityIndicator
-  ref={null}
-/>
-`;
+exports[`ActivityIndicator Component > matches snapshot with default props 1`] = `<ActivityIndicator />`;

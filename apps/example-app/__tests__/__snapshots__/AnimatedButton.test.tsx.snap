@@ -13,7 +13,6 @@ exports[`AnimatedButton > matches snapshot 1`] = `
   onPress={[Function]}
   onPressIn={[Function]}
   onPressOut={[Function]}
-  ref={null}
   style={
     [
       [
@@ -37,7 +36,6 @@ exports[`AnimatedButton > matches snapshot 1`] = `
   testID="btn"
 >
   <Text
-    ref={null}
     style={
       [
         {

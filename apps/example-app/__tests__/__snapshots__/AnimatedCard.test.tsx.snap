@@ -6,7 +6,6 @@ exports[`AnimatedCard > matches snapshot with image and liked 1`] = `
   accessible={true}
   onPressIn={[Function]}
   onPressOut={[Function]}
-  ref={null}
   style={
     [
       {
@@ -28,7 +27,6 @@ exports[`AnimatedCard > matches snapshot with image and liked 1`] = `
   testID="card"
 >
   <Image
-    ref={null}
     resizeMode="cover"
     source={
       {
@@ -46,7 +44,6 @@ exports[`AnimatedCard > matches snapshot with image and liked 1`] = `
   />
   <View
     accessible={false}
-    ref={null}
     style={
       {
         "padding": 16,
@@ -55,7 +52,6 @@ exports[`AnimatedCard > matches snapshot with image and liked 1`] = `
   >
     <Text
       numberOfLines={2}
-      ref={null}
       style={
         {
           "color": "#1C1C1E",
@@ -70,7 +66,6 @@ exports[`AnimatedCard > matches snapshot with image and liked 1`] = `
     </Text>
     <Text
       numberOfLines={3}
-      ref={null}
       style={
         {
           "color": "#8E8E93",
@@ -85,7 +80,6 @@ exports[`AnimatedCard > matches snapshot with image and liked 1`] = `
     </Text>
     <View
       accessible={false}
-      ref={null}
       style={
         {
           "flexDirection": "row",
@@ -98,7 +92,6 @@ exports[`AnimatedCard > matches snapshot with image and liked 1`] = `
         accessibilityRole="button"
         accessible={true}
         onPress={[Function]}
-        ref={null}
         style={
           [
             {
@@ -110,7 +103,6 @@ exports[`AnimatedCard > matches snapshot with image and liked 1`] = `
         testID="card-like"
       >
         <Text
-          ref={null}
           style={
             [
               {
@@ -136,7 +128,6 @@ exports[`AnimatedCard > matches snapshot without image 1`] = `
   accessible={true}
   onPressIn={[Function]}
   onPressOut={[Function]}
-  ref={null}
   style={
     [
       {
@@ -159,7 +150,6 @@ exports[`AnimatedCard > matches snapshot without image 1`] = `
 >
   <View
     accessible={false}
-    ref={null}
     style={
       {
         "padding": 16,
@@ -168,7 +158,6 @@ exports[`AnimatedCard > matches snapshot without image 1`] = `
   >
     <Text
       numberOfLines={2}
-      ref={null}
       style={
         {
           "color": "#1C1C1E",
@@ -183,7 +172,6 @@ exports[`AnimatedCard > matches snapshot without image 1`] = `
     </Text>
     <Text
       numberOfLines={3}
-      ref={null}
       style={
         {
           "color": "#8E8E93",
@@ -198,7 +186,6 @@ exports[`AnimatedCard > matches snapshot without image 1`] = `
     </Text>
     <View
       accessible={false}
-      ref={null}
       style={
         {
           "flexDirection": "row",
@@ -211,7 +198,6 @@ exports[`AnimatedCard > matches snapshot without image 1`] = `
         accessibilityRole="button"
         accessible={true}
         onPress={[Function]}
-        ref={null}
         style={
           [
             {
@@ -223,7 +209,6 @@ exports[`AnimatedCard > matches snapshot without image 1`] = `
         testID="card-like"
       >
         <Text
-          ref={null}
           style={
             [
               {

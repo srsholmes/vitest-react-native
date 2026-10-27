@@ -3,16 +3,13 @@
 exports[`View Component > matches snapshot 1`] = `
 <View
   accessible={false}
-  ref={null}
   style={
     {
       "flex": 1,
     }
   }
 >
-  <Text
-    ref={null}
-  >
+  <Text>
     Snapshot test
   </Text>
 </View>

@@ -162,6 +162,37 @@ All core React Native components are mocked and render as testable elements:
 | InputAccessoryView       | ✅     |
 | DrawerLayoutAndroid      | ✅     |
 
+### Component instance methods
+
+A `ref` to any of these components resolves to an object carrying React Native's
+`NativeMethods`, so code that reaches for an instance works:
+
+```tsx
+const input = useRef<TextInput>(null);
+const view = useRef<View>(null);
+
+input.current?.focus();
+input.current?.isFocused(); // true
+view.current?.measure((x, y, width, height, pageX, pageY) => {
+  /* ... */
+});
+```
+
+| Method                                    | Notes                                                           |
+| ----------------------------------------- | --------------------------------------------------------------- |
+| `measure(cb)`                             | Calls back with `(x, y, width, height, pageX, pageY)`, all zero |
+| `measureInWindow(cb)`                     | Calls back with `(x, y, width, height)`, all zero               |
+| `measureLayout(node, onSuccess, onFail?)` | Calls `onSuccess(0, 0, 0, 0)`                                   |
+| `setNativeProps(props)`                   | A spy; records the call                                         |
+| `focus()` / `blur()`                      | Spies. On `TextInput` they also drive `isFocused()`             |
+
+Measurements report zeros because nothing in a Node test environment has a real layout —
+the same choice React Native's own Jest mock made. They are `vi.fn()` spies, so you can
+assert they were called.
+
+`TextInput` adds `isFocused()`, `clear()` and `setSelection(start, end)` on top, and
+tracks focus state across `focus()` and `blur()`.
+
 ### APIs
 
 | API                | Status | Notes                                        |

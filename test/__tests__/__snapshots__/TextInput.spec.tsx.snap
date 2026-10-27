@@ -3,11 +3,9 @@
 exports[`TextInput Component > matches snapshot 1`] = `
 <View
   accessible={false}
-  ref={null}
 >
   <TextInput
     placeholder="Enter text"
-    ref={null}
     style={
       {
         "borderWidth": 1,

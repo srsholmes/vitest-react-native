@@ -3,7 +3,6 @@
 exports[`KeyboardAvoidingView Component > matches snapshot with form layout 1`] = `
 <KeyboardAvoidingView
   behavior="padding"
-  ref={null}
   style={
     {
       "flex": 1,
@@ -13,16 +12,13 @@ exports[`KeyboardAvoidingView Component > matches snapshot with form layout 1`] 
 >
   <TextInput
     placeholder="Enter text"
-    ref={null}
     style={
       {
         "marginBottom": 10,
       }
     }
   />
-  <Text
-    ref={null}
-  >
+  <Text>
     Submit Form
   </Text>
 </KeyboardAvoidingView>

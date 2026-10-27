@@ -3,7 +3,6 @@
 exports[`FadeInView > matches snapshot 1`] = `
 <View
   accessible={false}
-  ref={null}
   style={
     [
       undefined,
@@ -12,9 +11,7 @@ exports[`FadeInView > matches snapshot 1`] = `
   }
   testID="snapshot-view"
 >
-  <Text
-    ref={null}
-  >
+  <Text>
     Snapshot Content
   </Text>
 </View>

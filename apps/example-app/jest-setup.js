@@ -47,18 +47,19 @@ function mockComponent(name, instanceMethods) {
 
 function mockForwardRef(name) {
   const React = require('react');
-  const c = React.forwardRef((props, ref) =>
-    React.createElement(name, { ...props, ref }, props.children),
-  );
+  const c = React.forwardRef((props, ref) => {
+    React.useImperativeHandle(ref, () => mockNativeMethods(), []);
+    return React.createElement(name, { ...props }, props.children);
+  });
   c.displayName = name;
   return c;
 }
 
 function mockNativeMethods() {
   return {
-    measure: jest.fn(),
-    measureInWindow: jest.fn(),
-    measureLayout: jest.fn(),
+    measure: jest.fn((callback) => callback(0, 0, 0, 0, 0, 0)),
+    measureInWindow: jest.fn((callback) => callback(0, 0, 0, 0)),
+    measureLayout: jest.fn((_relativeToNativeNode, onSuccess) => onSuccess(0, 0, 0, 0)),
     setNativeProps: jest.fn(),
     focus: jest.fn(),
     blur: jest.fn(),
@@ -89,11 +90,29 @@ jest.mock('react-native/Libraries/Text/Text', () => {
 });
 
 jest.mock('react-native/Libraries/Components/TextInput/TextInput', () => {
-  const TextInput = mockComponent('TextInput', {
-    ...mockNativeMethods(),
-    clear: jest.fn(),
-    isFocused: jest.fn(() => false),
+  const React = require('react');
+  const TextInput = React.forwardRef((props, ref) => {
+    // A ref, not state: focus() must be observable by isFocused() without a re-render.
+    const focused = React.useRef(false);
+    React.useImperativeHandle(
+      ref,
+      () => ({
+        ...mockNativeMethods(),
+        focus: jest.fn(() => {
+          focused.current = true;
+        }),
+        blur: jest.fn(() => {
+          focused.current = false;
+        }),
+        isFocused: jest.fn(() => focused.current),
+        clear: jest.fn(),
+        setSelection: jest.fn(),
+      }),
+      []
+    );
+    return React.createElement('TextInput', { ...props });
   });
+  TextInput.displayName = 'TextInput';
   TextInput.State = {
     currentlyFocusedInput: jest.fn(() => null),
     currentlyFocusedField: jest.fn(() => null),

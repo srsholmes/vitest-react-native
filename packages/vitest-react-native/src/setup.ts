@@ -56,6 +56,20 @@ g.IS_REACT_NATIVE_TEST_ENVIRONMENT = true;
 g.nativeFabricUIManager = {};
 // The bridge config React Native's batched bridge reads at startup.
 g.__fbBatchedBridgeConfig = { remoteModuleConfig: [], localModulesConfig: [] };
+// The instance methods React Native exposes on every host component — its NativeMethods
+// interface. The component mocks hand this to useImperativeHandle so a ref resolves to
+// something with the shape real code calls. Measurements report zeros, as React Native's
+// own Jest mock did: predictable, and nothing in a test environment has a real layout.
+g.__vrnHostInstance = (): Record<string, unknown> => ({
+  measure: vi.fn((callback: (...args: number[]) => void) => callback(0, 0, 0, 0, 0, 0)),
+  measureInWindow: vi.fn((callback: (...args: number[]) => void) => callback(0, 0, 0, 0)),
+  measureLayout: vi.fn((_relativeToNativeNode: unknown, onSuccess: (...args: number[]) => void) =>
+    onSuccess(0, 0, 0, 0)
+  ),
+  setNativeProps: vi.fn(),
+  focus: vi.fn(),
+  blur: vi.fn(),
+});
 // Only when there is no window: assigning unconditionally replaced jsdom's window
 // with globalThis for anyone running a browser-like environment.
 if (g.window === undefined) {
@@ -324,12 +338,12 @@ const createAccessibleTouchableMock = (displayName: string): string => `(() => {
     const mergedAccessibilityState = disabled != null || accessibilityState
       ? { ...accessibilityState, ...(disabled != null ? { disabled: !!disabled } : {}) }
       : undefined;
+    React.useImperativeHandle(ref, () => global.__vrnHostInstance(), []);
     return React.createElement('${displayName}', {
       ...rest,
       disabled,
       accessible: props.accessible !== false,
       ...(mergedAccessibilityState ? { accessibilityState: mergedAccessibilityState } : {}),
-      ref,
     }, props.children);
   });
   ${displayName}.displayName = '${displayName}';
@@ -800,7 +814,8 @@ mock(
   const View = React.forwardRef((props, ref) => {
     const accessible = props.accessible !== undefined ? props.accessible
       : !!(props.accessibilityRole || props.accessibilityLabel || props.role);
-    return React.createElement('View', { ...props, accessible, ref }, props.children);
+    React.useImperativeHandle(ref, () => global.__vrnHostInstance(), []);
+    return React.createElement('View', { ...props, accessible }, props.children);
   });
   View.displayName = 'View';
   return { __esModule: true, default: View };
@@ -815,7 +830,8 @@ mock(
   const ViewNativeComponent = React.forwardRef((props, ref) => {
     const accessible = props.accessible !== undefined ? props.accessible
       : !!(props.accessibilityRole || props.accessibilityLabel || props.role);
-    return React.createElement('View', { ...props, accessible, ref }, props.children);
+    React.useImperativeHandle(ref, () => global.__vrnHostInstance(), []);
+    return React.createElement('View', { ...props, accessible }, props.children);
   });
   ViewNativeComponent.displayName = 'View';
   const Commands = {
@@ -834,7 +850,8 @@ mock(
   () => `(() => {
   const React = require('react');
   const Text = React.forwardRef((props, ref) => {
-    return React.createElement('Text', { ...props, ref }, props.children);
+    React.useImperativeHandle(ref, () => global.__vrnHostInstance(), []);
+    return React.createElement('Text', { ...props }, props.children);
   });
   Text.displayName = 'Text';
   return { __esModule: true, default: Text };
@@ -847,7 +864,21 @@ mock(
   () => `(() => {
   const React = require('react');
   const TextInput = React.forwardRef((props, ref) => {
-    return React.createElement('TextInput', { ...props, ref });
+    // A ref, not state: focus() must be observable by isFocused() without a re-render.
+    const focused = React.useRef(false);
+    React.useImperativeHandle(ref, () => ({
+      ...global.__vrnHostInstance(),
+      focus: vi.fn(() => {
+        focused.current = true;
+      }),
+      blur: vi.fn(() => {
+        focused.current = false;
+      }),
+      isFocused: vi.fn(() => focused.current),
+      clear: vi.fn(),
+      setSelection: vi.fn(),
+    }), []);
+    return React.createElement('TextInput', { ...props });
   });
   TextInput.displayName = 'TextInput';
   TextInput.State = {
@@ -866,7 +897,8 @@ mock(
   () => `(() => {
   const React = require('react');
   const Image = React.forwardRef((props, ref) => {
-    return React.createElement('Image', { ...props, ref });
+    React.useImperativeHandle(ref, () => global.__vrnHostInstance(), []);
+    return React.createElement('Image', { ...props });
   });
   Image.displayName = 'Image';
   Image.getSize = vi.fn((uri, success, failure) => success && success(100, 100));
@@ -945,7 +977,8 @@ mock(
   () => `(() => {
   const React = require('react');
   const ActivityIndicator = React.forwardRef((props, ref) => {
-    return React.createElement('ActivityIndicator', { ...props, ref });
+    React.useImperativeHandle(ref, () => global.__vrnHostInstance(), []);
+    return React.createElement('ActivityIndicator', { ...props });
   });
   ActivityIndicator.displayName = 'ActivityIndicator';
   return { __esModule: true, default: ActivityIndicator };
@@ -964,11 +997,11 @@ mock(
     const mergedAccessibilityState = disabled != null || accessibilityState
       ? { ...accessibilityState, ...(disabled != null ? { disabled: !!disabled } : {}) }
       : undefined;
+    React.useImperativeHandle(ref, () => global.__vrnHostInstance(), []);
     return React.createElement('Pressable', {
       ...rest,
       accessible: props.accessible !== false,
       style: resolvedStyle,
-      ref,
       onPress: disabled ? undefined : onPress,
       onPressIn,
       onPressOut,
@@ -998,7 +1031,8 @@ mock(
   () => `(() => {
   const React = require('react');
   const SafeAreaView = React.forwardRef((props, ref) => {
-    return React.createElement('SafeAreaView', { ...props, ref }, props.children);
+    React.useImperativeHandle(ref, () => global.__vrnHostInstance(), []);
+    return React.createElement('SafeAreaView', { ...props }, props.children);
   });
   SafeAreaView.displayName = 'SafeAreaView';
   return { __esModule: true, default: SafeAreaView };
@@ -1037,11 +1071,11 @@ mock(
     const mergedAccessibilityState = disabled != null || accessibilityState
       ? { ...accessibilityState, ...(disabled != null ? { disabled: !!disabled } : {}) }
       : undefined;
+    React.useImperativeHandle(ref, () => global.__vrnHostInstance(), []);
     return React.createElement('Switch', {
       ...rest,
       disabled,
       ...(mergedAccessibilityState ? { accessibilityState: mergedAccessibilityState } : {}),
-      ref,
     });
   });
   Switch.displayName = 'Switch';
@@ -1287,7 +1321,8 @@ mock(
   () => `(() => {
   const React = require('react');
   const RefreshControl = React.forwardRef((props, ref) => {
-    return React.createElement('RefreshControl', { ...props, ref });
+    React.useImperativeHandle(ref, () => global.__vrnHostInstance(), []);
+    return React.createElement('RefreshControl', { ...props });
   });
   RefreshControl.displayName = 'RefreshControl';
   return { __esModule: true, default: RefreshControl };
@@ -1556,7 +1591,8 @@ mock(
   () => `(() => {
   const React = require('react');
   const ImageBackground = React.forwardRef((props, ref) => {
-    return React.createElement('ImageBackground', { ...props, ref }, props.children);
+    React.useImperativeHandle(ref, () => global.__vrnHostInstance(), []);
+    return React.createElement('ImageBackground', { ...props }, props.children);
   });
   ImageBackground.displayName = 'ImageBackground';
   return { __esModule: true, default: ImageBackground };
@@ -1569,7 +1605,8 @@ mock(
   () => `(() => {
   const React = require('react');
   const KeyboardAvoidingView = React.forwardRef((props, ref) => {
-    return React.createElement('KeyboardAvoidingView', { ...props, ref }, props.children);
+    React.useImperativeHandle(ref, () => global.__vrnHostInstance(), []);
+    return React.createElement('KeyboardAvoidingView', { ...props }, props.children);
   });
   KeyboardAvoidingView.displayName = 'KeyboardAvoidingView';
   return { __esModule: true, default: KeyboardAvoidingView };
