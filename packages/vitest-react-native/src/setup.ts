@@ -1001,7 +1001,14 @@ mock(
     scrollResponderScrollNativeHandleToKeyboard = vi.fn();
 
     render() {
-      return React.createElement('ScrollView', this.props, this.props.children);
+      // refreshControl is an element, not a value: React Native mounts it as part of
+      // the scroll view. Passing it straight through left it unmounted in props, so
+      // nothing given to it rendered. Only branched when present, so a scroll view
+      // without one keeps exactly the children shape it had.
+      const { refreshControl, children, ...rest } = this.props;
+      return refreshControl
+        ? React.createElement('ScrollView', rest, refreshControl, children)
+        : React.createElement('ScrollView', rest, children);
     }
   }
   ScrollView.displayName = 'ScrollView';
@@ -1138,7 +1145,7 @@ mock(
     getScrollableNode = vi.fn();
 
     render() {
-      const { data, renderItem, ListHeaderComponent, ListFooterComponent, ListEmptyComponent, ItemSeparatorComponent, keyExtractor, ...rest } = this.props;
+      const { data, renderItem, ListHeaderComponent, ListFooterComponent, ListEmptyComponent, ItemSeparatorComponent, keyExtractor, refreshControl, ...rest } = this.props;
       const children = [];
 
       if (ListHeaderComponent) {
@@ -1163,6 +1170,11 @@ mock(
           typeof ListFooterComponent === 'function' ? React.createElement(ListFooterComponent) : ListFooterComponent));
       }
 
+      // Keyed because these are array children; React Native mounts the control
+      // as part of the list rather than leaving it unmounted in props.
+      if (refreshControl) {
+        children.unshift(React.cloneElement(refreshControl, { key: 'refresh-control' }));
+      }
       return React.createElement('FlatList', rest, children);
     }
   }
@@ -1185,7 +1197,7 @@ mock(
     getScrollableNode = vi.fn();
 
     render() {
-      const { sections, renderItem, renderSectionHeader, ListHeaderComponent, ListFooterComponent, ListEmptyComponent, ItemSeparatorComponent, SectionSeparatorComponent, keyExtractor, ...rest } = this.props;
+      const { sections, renderItem, renderSectionHeader, ListHeaderComponent, ListFooterComponent, ListEmptyComponent, ItemSeparatorComponent, SectionSeparatorComponent, keyExtractor, refreshControl, ...rest } = this.props;
       const children = [];
 
       if (ListHeaderComponent) {
@@ -1222,6 +1234,11 @@ mock(
           typeof ListFooterComponent === 'function' ? React.createElement(ListFooterComponent) : ListFooterComponent));
       }
 
+      // Keyed because these are array children; React Native mounts the control
+      // as part of the list rather than leaving it unmounted in props.
+      if (refreshControl) {
+        children.unshift(React.cloneElement(refreshControl, { key: 'refresh-control' }));
+      }
       return React.createElement('SectionList', rest, children);
     }
   }
@@ -1760,7 +1777,7 @@ mock(
     getScrollableNode = vi.fn();
 
     render() {
-      const { data, renderItem, getItem, getItemCount, ListHeaderComponent, ListFooterComponent, ListEmptyComponent, ItemSeparatorComponent, keyExtractor, ...rest } = this.props;
+      const { data, renderItem, getItem, getItemCount, ListHeaderComponent, ListFooterComponent, ListEmptyComponent, ItemSeparatorComponent, keyExtractor, refreshControl, ...rest } = this.props;
       const children = [];
 
       if (ListHeaderComponent) {
@@ -1787,6 +1804,11 @@ mock(
           typeof ListFooterComponent === 'function' ? React.createElement(ListFooterComponent) : ListFooterComponent));
       }
 
+      // Keyed because these are array children; React Native mounts the control
+      // as part of the list rather than leaving it unmounted in props.
+      if (refreshControl) {
+        children.unshift(React.cloneElement(refreshControl, { key: 'refresh-control' }));
+      }
       return React.createElement('VirtualizedList', rest, children);
     }
   }

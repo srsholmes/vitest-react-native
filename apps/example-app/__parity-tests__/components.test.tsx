@@ -586,6 +586,51 @@ describe('RefreshControl', () => {
     );
     expect(screen.getByText('Pull to refresh')).toBeTruthy();
   });
+
+  // The control itself has to mount, not just sit unrendered in the scrollable's props.
+  test('the control itself is mounted by ScrollView', () => {
+    render(
+      <ScrollView
+        testID="sv"
+        refreshControl={<RefreshControl testID="rc" refreshing onRefresh={fn()} />}
+      >
+        <Text>Pull to refresh</Text>
+      </ScrollView>,
+    );
+
+    expect(screen.getByTestId('rc')).toBeTruthy();
+    expect(screen.getByTestId('rc').props.refreshing).toBe(true);
+    expect(screen.getByText('Pull to refresh')).toBeTruthy();
+  });
+
+  test('firing refresh calls onRefresh', () => {
+    const onRefresh = fn();
+    render(
+      <ScrollView
+        refreshControl={<RefreshControl testID="rc" refreshing={false} onRefresh={onRefresh} />}
+      >
+        <Text>Pull to refresh</Text>
+      </ScrollView>,
+    );
+
+    fireEvent(screen.getByTestId('rc'), 'refresh');
+
+    expect(onRefresh).toHaveBeenCalledTimes(1);
+  });
+
+  test('the control itself is mounted by FlatList', () => {
+    render(
+      <FlatList
+        testID="fl"
+        data={['a']}
+        renderItem={({ item }) => <Text>{item}</Text>}
+        refreshControl={<RefreshControl testID="rc" refreshing={false} onRefresh={fn()} />}
+      />,
+    );
+
+    expect(screen.getByTestId('rc')).toBeTruthy();
+    expect(screen.getByText('a')).toBeTruthy();
+  });
 });
 
 // ---------------------------------------------------------------------------

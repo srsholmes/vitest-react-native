@@ -142,19 +142,29 @@ jest.mock('react-native/Libraries/Image/Image', () => {
 });
 
 jest.mock('react-native/Libraries/Components/ScrollView/ScrollView', () => {
-  const ScrollView = mockComponent('ScrollView', {
-    scrollTo: jest.fn(),
-    scrollToEnd: jest.fn(),
-    flashScrollIndicators: jest.fn(),
-    getScrollResponder: jest.fn(function () {
+  const mockReact = require('react');
+  // Its own class rather than mockComponent(), which renders only this.props.children
+  // and so would leave refreshControl unmounted in props.
+  class MockScrollView extends mockReact.Component {
+    scrollTo = jest.fn();
+    scrollToEnd = jest.fn();
+    flashScrollIndicators = jest.fn();
+    getScrollResponder = jest.fn(function () {
       return this;
-    }),
-    getScrollableNode: jest.fn(),
-    getInnerViewNode: jest.fn(),
-    getInnerViewRef: jest.fn(),
-    getNativeScrollRef: jest.fn(),
-  });
-  return { __esModule: true, default: ScrollView };
+    });
+    getScrollableNode = jest.fn();
+    getInnerViewNode = jest.fn();
+    getInnerViewRef = jest.fn();
+    getNativeScrollRef = jest.fn();
+    render() {
+      const { refreshControl, children, ...rest } = this.props;
+      return refreshControl
+        ? mockReact.createElement('ScrollView', rest, refreshControl, children)
+        : mockReact.createElement('ScrollView', rest, children);
+    }
+  }
+  MockScrollView.displayName = 'ScrollView';
+  return { __esModule: true, default: MockScrollView };
 });
 
 jest.mock('react-native/Libraries/Lists/FlatList', () => {
@@ -164,7 +174,7 @@ jest.mock('react-native/Libraries/Lists/FlatList', () => {
     scrollToIndex = jest.fn();
     scrollToOffset = jest.fn();
     render() {
-      const { data, renderItem, ListHeaderComponent, ListFooterComponent, ListEmptyComponent, keyExtractor, ...rest } = this.props;
+      const { data, renderItem, ListHeaderComponent, ListFooterComponent, ListEmptyComponent, keyExtractor, refreshControl, ...rest } = this.props;
       const mockChildren = [];
       if (ListHeaderComponent) mockChildren.push(mockReact.createElement('View', { key: 'header' }, typeof ListHeaderComponent === 'function' ? mockReact.createElement(ListHeaderComponent) : ListHeaderComponent));
       if (data && data.length > 0) {
@@ -176,6 +186,8 @@ jest.mock('react-native/Libraries/Lists/FlatList', () => {
         mockChildren.push(typeof ListEmptyComponent === 'function' ? mockReact.createElement(ListEmptyComponent) : ListEmptyComponent);
       }
       if (ListFooterComponent) mockChildren.push(mockReact.createElement('View', { key: 'footer' }, typeof ListFooterComponent === 'function' ? mockReact.createElement(ListFooterComponent) : ListFooterComponent));
+      if (refreshControl)
+        mockChildren.unshift(mockReact.cloneElement(refreshControl, { key: 'refresh-control' }));
       return mockReact.createElement('FlatList', rest, mockChildren);
     }
   }
@@ -187,7 +199,7 @@ jest.mock('react-native/Libraries/Lists/SectionList', () => {
   const mockReact = require('react');
   class MockSectionList extends mockReact.Component {
     render() {
-      const { sections, renderItem, renderSectionHeader, ListHeaderComponent, ListFooterComponent, ListEmptyComponent, keyExtractor, ...rest } = this.props;
+      const { sections, renderItem, renderSectionHeader, ListHeaderComponent, ListFooterComponent, ListEmptyComponent, keyExtractor, refreshControl, ...rest } = this.props;
       const mockChildren = [];
       if (ListHeaderComponent) mockChildren.push(mockReact.createElement('View', { key: 'list-header' }, typeof ListHeaderComponent === 'function' ? mockReact.createElement(ListHeaderComponent) : ListHeaderComponent));
       if (sections && sections.length > 0) {
@@ -202,6 +214,8 @@ jest.mock('react-native/Libraries/Lists/SectionList', () => {
         mockChildren.push(typeof ListEmptyComponent === 'function' ? mockReact.createElement(ListEmptyComponent) : ListEmptyComponent);
       }
       if (ListFooterComponent) mockChildren.push(mockReact.createElement('View', { key: 'list-footer' }, typeof ListFooterComponent === 'function' ? mockReact.createElement(ListFooterComponent) : ListFooterComponent));
+      if (refreshControl)
+        mockChildren.unshift(mockReact.cloneElement(refreshControl, { key: 'refresh-control' }));
       return mockReact.createElement('SectionList', rest, mockChildren);
     }
   }
