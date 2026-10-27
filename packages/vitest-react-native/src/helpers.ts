@@ -9,8 +9,12 @@ import { Appearance, Dimensions, Platform } from 'react-native';
  */
 
 /**
- * What Appearance.setColorScheme() accepts in React Native 0.87 — not `null`.
- * 'unspecified' is React Native's deprecated spelling of 'auto'.
+ * What Appearance.setColorScheme() accepts — not `null`.
+ *
+ * React Native's own type for this differs across the versions this plugin supports:
+ * 0.85 declares `'light' | 'dark' | 'unspecified'`, and 0.87 added `'auto'` as the
+ * preferred spelling of the same thing. This union is both, since the mock handles both
+ * identically at runtime.
  */
 export type ColorScheme = 'light' | 'dark' | 'auto' | 'unspecified';
 
@@ -64,7 +68,10 @@ export const setDimensions = (dimensions: DimensionValues): void => {
  * 'auto' returns to the resting scheme: there is no system appearance to follow.
  */
 export const setColorScheme = (scheme: ColorScheme): void => {
-  Appearance.setColorScheme(scheme);
+  // Cast because React Native's declared parameter type changed between the versions
+  // this plugin supports — 0.85 has no 'auto' — while the runtime behaviour is the same
+  // on both. Without it the build fails on the older React Native.
+  Appearance.setColorScheme(scheme as never);
 };
 
 /**

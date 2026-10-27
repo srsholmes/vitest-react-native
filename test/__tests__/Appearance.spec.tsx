@@ -69,10 +69,13 @@ describe('Appearance', () => {
 
   // getColorScheme() returns 'light' | 'dark' | null, never the override keyword. With
   // no system appearance to follow, 'auto' resolves to the resting scheme.
+  //
+  // Cast to never because React Native's declared parameter type differs across the
+  // versions this plugin supports: 0.85 has no 'auto'. Both are handled identically.
   test.each(['auto', 'unspecified'] as const)('setColorScheme(%s) resolves to light', (value) => {
     Appearance.setColorScheme('dark');
 
-    Appearance.setColorScheme(value as 'auto');
+    Appearance.setColorScheme(value as never);
 
     expect(Appearance.getColorScheme()).toBe('light');
   });
