@@ -4,14 +4,11 @@ exports[`RefreshControl Component > matches snapshot 1`] = `
 <View
   accessible={false}
 >
-  <ScrollView
-    refreshControl={
-      <RefreshControl
-        onRefresh={[Function]}
-        refreshing={false}
-      />
-    }
-  >
+  <ScrollView>
+    <RefreshControl
+      onRefresh={[Function]}
+      refreshing={false}
+    />
     <Text>
       Pull to refresh content
     </Text>
