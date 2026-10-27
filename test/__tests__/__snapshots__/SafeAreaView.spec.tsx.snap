@@ -2,16 +2,13 @@
 
 exports[`SafeAreaView Component > matches snapshot 1`] = `
 <SafeAreaView
-  ref={null}
   style={
     {
       "flex": 1,
     }
   }
 >
-  <Text
-    ref={null}
-  >
+  <Text>
     Safe Area Content
   </Text>
 </SafeAreaView>

@@ -8,19 +8,13 @@ exports[`ScrollView Component > matches snapshot 1`] = `
     }
   }
 >
-  <Text
-    ref={null}
-  >
+  <Text>
     Item 1
   </Text>
-  <Text
-    ref={null}
-  >
+  <Text>
     Item 2
   </Text>
-  <Text
-    ref={null}
-  >
+  <Text>
     Item 3
   </Text>
 </ScrollView>

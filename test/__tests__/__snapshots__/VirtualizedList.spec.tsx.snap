@@ -4,31 +4,22 @@ exports[`VirtualizedList > matches snapshot 1`] = `
 <VirtualizedList>
   <View
     accessible={false}
-    ref={null}
   >
-    <Text
-      ref={null}
-    >
+    <Text>
       Item 1
     </Text>
   </View>
   <View
     accessible={false}
-    ref={null}
   >
-    <Text
-      ref={null}
-    >
+    <Text>
       Item 2
     </Text>
   </View>
   <View
     accessible={false}
-    ref={null}
   >
-    <Text
-      ref={null}
-    >
+    <Text>
       Item 3
     </Text>
   </View>

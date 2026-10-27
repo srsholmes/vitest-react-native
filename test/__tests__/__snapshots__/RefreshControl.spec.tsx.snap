@@ -3,7 +3,6 @@
 exports[`RefreshControl Component > matches snapshot 1`] = `
 <View
   accessible={false}
-  ref={null}
 >
   <ScrollView
     refreshControl={
@@ -13,9 +12,7 @@ exports[`RefreshControl Component > matches snapshot 1`] = `
       />
     }
   >
-    <Text
-      ref={null}
-    >
+    <Text>
       Pull to refresh content
     </Text>
   </ScrollView>

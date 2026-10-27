@@ -2,7 +2,6 @@
 
 exports[`ImageBackground Component > matches snapshot 1`] = `
 <ImageBackground
-  ref={null}
   source={
     {
       "uri": "https://example.com/image.png",
@@ -16,7 +15,6 @@ exports[`ImageBackground Component > matches snapshot 1`] = `
   }
 >
   <Text
-    ref={null}
     style={
       {
         "color": "white",

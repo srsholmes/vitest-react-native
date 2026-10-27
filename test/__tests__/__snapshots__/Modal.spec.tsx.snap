@@ -10,7 +10,6 @@ exports[`Modal Component > matches snapshot when visible 1`] = `
 >
   <View
     accessible={false}
-    ref={null}
     style={
       {
         "alignItems": "center",
@@ -21,7 +20,6 @@ exports[`Modal Component > matches snapshot when visible 1`] = `
   >
     <View
       accessible={false}
-      ref={null}
       style={
         {
           "backgroundColor": "white",
@@ -30,9 +28,7 @@ exports[`Modal Component > matches snapshot when visible 1`] = `
         }
       }
     >
-      <Text
-        ref={null}
-      >
+      <Text>
         Modal Content
       </Text>
     </View>

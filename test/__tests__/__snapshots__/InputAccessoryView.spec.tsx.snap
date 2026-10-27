@@ -6,16 +6,13 @@ exports[`InputAccessoryView > matches snapshot 1`] = `
 >
   <View
     accessible={false}
-    ref={null}
   >
     <Button
       accessibilityRole="button"
       accessible={true}
       onPress={[Function]}
     >
-      <Text
-        ref={null}
-      >
+      <Text>
         Cancel
       </Text>
     </Button>
@@ -24,9 +21,7 @@ exports[`InputAccessoryView > matches snapshot 1`] = `
       accessible={true}
       onPress={[Function]}
     >
-      <Text
-        ref={null}
-      >
+      <Text>
         Done
       </Text>
     </Button>

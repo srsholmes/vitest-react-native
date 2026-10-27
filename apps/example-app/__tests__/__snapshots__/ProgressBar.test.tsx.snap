@@ -3,7 +3,6 @@
 exports[`CircularProgress > matches snapshot 1`] = `
 <View
   accessible={false}
-  ref={null}
   style={
     [
       {
@@ -20,7 +19,6 @@ exports[`CircularProgress > matches snapshot 1`] = `
 >
   <View
     accessible={false}
-    ref={null}
     style={
       {
         "position": "absolute",
@@ -29,7 +27,6 @@ exports[`CircularProgress > matches snapshot 1`] = `
   >
     <View
       accessible={false}
-      ref={null}
       style={
         [
           {
@@ -48,7 +45,6 @@ exports[`CircularProgress > matches snapshot 1`] = `
   </View>
   <View
     accessible={false}
-    ref={null}
     style={
       {
         "position": "absolute",
@@ -56,7 +52,6 @@ exports[`CircularProgress > matches snapshot 1`] = `
     }
   >
     <Text
-      ref={null}
       style={
         {
           "color": "#1C1C1E",
@@ -76,7 +71,6 @@ exports[`CircularProgress > matches snapshot 1`] = `
 exports[`ProgressBar > matches snapshot at 0% 1`] = `
 <View
   accessible={false}
-  ref={null}
   style={
     {
       "width": "100%",
@@ -86,7 +80,6 @@ exports[`ProgressBar > matches snapshot at 0% 1`] = `
 >
   <View
     accessible={false}
-    ref={null}
     style={
       {
         "marginBottom": 8,
@@ -94,7 +87,6 @@ exports[`ProgressBar > matches snapshot at 0% 1`] = `
     }
   >
     <Text
-      ref={null}
       style={
         {
           "color": "#1C1C1E",
@@ -110,7 +102,6 @@ exports[`ProgressBar > matches snapshot at 0% 1`] = `
   </View>
   <View
     accessible={false}
-    ref={null}
     style={
       [
         {
@@ -127,7 +118,6 @@ exports[`ProgressBar > matches snapshot at 0% 1`] = `
   >
     <View
       accessible={false}
-      ref={null}
       style={
         [
           {
@@ -150,7 +140,6 @@ exports[`ProgressBar > matches snapshot at 0% 1`] = `
 exports[`ProgressBar > matches snapshot at 50% 1`] = `
 <View
   accessible={false}
-  ref={null}
   style={
     {
       "width": "100%",
@@ -160,7 +149,6 @@ exports[`ProgressBar > matches snapshot at 50% 1`] = `
 >
   <View
     accessible={false}
-    ref={null}
     style={
       {
         "marginBottom": 8,
@@ -168,7 +156,6 @@ exports[`ProgressBar > matches snapshot at 50% 1`] = `
     }
   >
     <Text
-      ref={null}
       style={
         {
           "color": "#1C1C1E",
@@ -184,7 +171,6 @@ exports[`ProgressBar > matches snapshot at 50% 1`] = `
   </View>
   <View
     accessible={false}
-    ref={null}
     style={
       [
         {
@@ -201,7 +187,6 @@ exports[`ProgressBar > matches snapshot at 50% 1`] = `
   >
     <View
       accessible={false}
-      ref={null}
       style={
         [
           {
@@ -224,7 +209,6 @@ exports[`ProgressBar > matches snapshot at 50% 1`] = `
 exports[`ProgressBar > matches snapshot at 100% 1`] = `
 <View
   accessible={false}
-  ref={null}
   style={
     {
       "width": "100%",
@@ -234,7 +218,6 @@ exports[`ProgressBar > matches snapshot at 100% 1`] = `
 >
   <View
     accessible={false}
-    ref={null}
     style={
       {
         "marginBottom": 8,
@@ -242,7 +225,6 @@ exports[`ProgressBar > matches snapshot at 100% 1`] = `
     }
   >
     <Text
-      ref={null}
       style={
         {
           "color": "#1C1C1E",
@@ -258,7 +240,6 @@ exports[`ProgressBar > matches snapshot at 100% 1`] = `
   </View>
   <View
     accessible={false}
-    ref={null}
     style={
       [
         {
@@ -275,7 +256,6 @@ exports[`ProgressBar > matches snapshot at 100% 1`] = `
   >
     <View
       accessible={false}
-      ref={null}
       style={
         [
           {

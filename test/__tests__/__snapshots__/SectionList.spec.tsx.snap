@@ -3,67 +3,42 @@
 exports[`SectionList Component > matches snapshot 1`] = `
 <View
   accessible={false}
-  ref={null}
 >
   <SectionList>
-    <Text
-      ref={null}
-    >
+    <Text>
       Main dishes
     </Text>
-    <Text
-      ref={null}
-    >
+    <Text>
       Pizza
     </Text>
-    <Text
-      ref={null}
-    >
+    <Text>
       Burger
     </Text>
-    <Text
-      ref={null}
-    >
+    <Text>
       Risotto
     </Text>
-    <Text
-      ref={null}
-    >
+    <Text>
       Sides
     </Text>
-    <Text
-      ref={null}
-    >
+    <Text>
       French Fries
     </Text>
-    <Text
-      ref={null}
-    >
+    <Text>
       Onion Rings
     </Text>
-    <Text
-      ref={null}
-    >
+    <Text>
       Fried Shrimps
     </Text>
-    <Text
-      ref={null}
-    >
+    <Text>
       Drinks
     </Text>
-    <Text
-      ref={null}
-    >
+    <Text>
       Water
     </Text>
-    <Text
-      ref={null}
-    >
+    <Text>
       Coke
     </Text>
-    <Text
-      ref={null}
-    >
+    <Text>
       Beer
     </Text>
   </SectionList>

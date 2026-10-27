@@ -3,11 +3,9 @@
 exports[`TouchableOpacity Component > matches snapshot 1`] = `
 <View
   accessible={false}
-  ref={null}
 >
   <TouchableOpacity
     accessible={true}
-    ref={null}
     style={
       {
         "backgroundColor": "blue",
@@ -16,7 +14,6 @@ exports[`TouchableOpacity Component > matches snapshot 1`] = `
     }
   >
     <Text
-      ref={null}
       style={
         {
           "color": "white",
