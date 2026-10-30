@@ -1,5 +1,186 @@
 # @srsholmes/vitest-react-native
 
+## 0.3.0
+
+### Minor Changes
+
+- e49e70c: Fix four mock-fidelity defects and add an export smoke test.
+  - `Platform.select` now reads `Platform.OS` when it is called. It was hardcoded to the
+    `ios` key, so a test that set `Platform.OS = 'android'` still received the iOS value
+    from every `select()`. Key presence still wins over value, matching React Native's own
+    `Platform.ios.js`, so `select({ ios: undefined, default: 'D' })` is still `undefined`.
+  - `Dimensions.set()` now updates state and notifies `addEventListener` handlers, and
+    `Dimensions.get()` returns a copy. `set()` was a no-op and handlers were discarded, so
+    rotation and responsive-layout tests could not be written. A `_reset()` hook restores
+    the resting state between tests.
+  - `useWindowDimensions()` now reads `Dimensions` when called, so the hook and
+    `Dimensions.get('window')` can no longer disagree. It does not subscribe, so an update
+    does not itself trigger a re-render.
+  - `ErrorUtils` and `__fbBatchedBridgeConfig` are now installed. `ErrorUtils` is read at
+    module scope by Expo's `Expo.fx`, so Expo imports previously failed before any test
+    ran. `globalThis.window` is now only assigned when it is absent, instead of replacing
+    an existing one.
+  - `DeviceEventEmitter` gained a `_reset()` hook. It is a module-level singleton, so a
+    listener registered in one test stayed subscribed for the rest of the file.
+
+  **Breaking:** `fontScale` is now `1` rather than `2`, in `Dimensions.get()`,
+  `PixelRatio.getFontScale()`, `useWindowDimensions()` and `DeviceInfo.getConstants()`. The
+  old value described a device with text size at 200%, which silently doubled any
+  `fontScale`-based layout maths. Tests asserting `fontScale === 2` need updating. Width,
+  height and `scale` are unchanged.
+
+- 8155167: Fix ref forwarding: a `ref` to a component now resolves instead of staying `null`.
+
+  The component mocks passed `ref` **inside the props object** of the host element they
+  render — `React.createElement('View', { ...props, ref })` — where React does not consume
+  it as a ref. It stayed a plain prop, so `ref.current` was always `null`,
+  `TextInput.focus()` was unreachable, and `ref={null}` appeared in every snapshot. Only the
+  class-based mocks (`ScrollView`, `Modal`, `FlatList`, …) worked, by accident of being
+  classes, which is why this went unnoticed: no test in the repo exercised a ref.
+
+  Affected, and now fixed: `View`, `Text`, `TextInput`, `Image`, `ImageBackground`,
+  `ActivityIndicator`, `KeyboardAvoidingView`, `RefreshControl`, `SafeAreaView`,
+  `Pressable`, `Switch` and the `Touchable*` family.
+
+  Each now hands `useImperativeHandle` an object carrying React Native's `NativeMethods`:
+
+  ```tsx
+  const input = useRef<TextInput>(null);
+  input.current?.focus();
+  input.current?.isFocused(); // true
+  ```
+
+  - `measure`, `measureInWindow` and `measureLayout` call back with zeros — nothing in a
+    Node test environment has a real layout, the same choice React Native's own Jest mock
+    made. All are `vi.fn()` spies, so calls can be asserted.
+  - `setNativeProps`, `focus` and `blur` are spies.
+  - `TextInput` adds `isFocused()`, `clear()` and `setSelection(start, end)`, and tracks
+    focus state across `focus()` and `blur()`.
+
+  **Snapshots change.** Removing `ref` from props drops `ref={null}` from every rendered
+  element, which collapses tags that had no other props — `<Text ref={null}>` becomes
+  `<Text>`. 30 snapshot files in this repo were regenerated; yours will need the same
+  (`vitest -u`). No other content changed.
+
+  Mirrored into the Jest parity baseline, where `mockForwardRef` had the identical defect
+  and the `mockNativeMethods` helper it should have been using was defined but never wired
+  up.
+
+- 73b17e0: Mount the `refreshControl` prop, so pull-to-refresh can be tested.
+
+  `refreshControl` takes an element, which React Native mounts as part of the scrollable.
+  The mocks passed it straight through as a prop instead, so it was never mounted: it did
+  not render, nothing inside it was queryable, and it serialised into snapshots as an
+  unmounted element sitting in props.
+
+  Fixed on `ScrollView`, `FlatList`, `SectionList` and `VirtualizedList`. The lists had the
+  same defect because `refreshControl` fell into the props they spread onto their host
+  element.
+
+  The payoff is that the control is now in the tree, so there is something to fire an event
+  on:
+
+  ```tsx
+  const onRefresh = vi.fn();
+  const { getByTestId } = render(
+    <FlatList
+      data={items}
+      renderItem={renderItem}
+      refreshControl={<RefreshControl testID="refresh" refreshing={false} onRefresh={onRefresh} />}
+    />
+  );
+
+  fireEvent(getByTestId('refresh'), 'refresh');
+  expect(onRefresh).toHaveBeenCalledTimes(1);
+  ```
+
+  **Snapshots change only where a `refreshControl` is passed.** The control moves out of the
+  props and in as the scrollable's first child. Scrollables without one are untouched —
+  mounting is branched on the prop being present specifically so their children keep the
+  shape they had. One snapshot changed in this repo.
+
+  The existing tests for this never caught it because they only ever asserted that the
+  _scrollable_ rendered, never the control.
+
+- 2f1959f: Add a public test-helpers API, and make `Keyboard`, `AppState` and `Appearance` stateful.
+
+  ```ts
+  import {
+    setPlatform,
+    setDimensions,
+    setColorScheme,
+    mockNativeModule,
+    resetAllMocks,
+  } from '@srsholmes/vitest-react-native/helpers';
+  ```
+
+  - `setPlatform('android')` switches `Platform.OS` and `Version`; `select()` already reads
+    `OS` at call time, so it follows.
+  - `setDimensions({ width, height })` merges into the current size and notifies change
+    listeners; `useWindowDimensions()` reports it.
+  - `setColorScheme('dark')` drives `Appearance.getColorScheme()`, `useColorScheme()` and
+    change listeners together. `'auto'` returns to `'light'` — there is no system appearance
+    to follow in a test.
+  - `mockNativeModule(name, impl)` stands in for a native module, reaching **both**
+    `NativeModules[name]` and `TurboModuleRegistry.get`/`getEnforcing`. Modern React Native
+    libraries read the latter, so covering only `NativeModules` would miss most of them.
+  - `resetAllMocks()` restores every stateful mock at once. It deliberately leaves spy call
+    history alone — Vitest owns that through its `clearMocks` / `mockReset` options, and
+    resetting implementations here would drop the ones the mocks were built with.
+
+  **Mocks that now hold state.** `Appearance.setColorScheme()` was a no-op that never
+  changed `getColorScheme()`, and `Keyboard`/`AppState` discarded every listener handed to
+  them, so none of these could be exercised in a test:
+  - `Appearance` — the scheme is real, listeners fire, and `useColorScheme()` plus
+    `NativeAppearance` both read through it rather than keeping their own copies. The three
+    previously disagreed the moment any of them changed.
+  - `Keyboard` — listeners fire, `isVisible()`/`metrics()` track state, and `dismiss()`
+    hides the keyboard as it does on a device. `_show(height)` and `_hide()` simulate
+    events; `metrics()` still returns `null` when hidden.
+  - `AppState` — `currentState` is now a getter backed by state, listeners fire, and
+    `_setState(state)` simulates a transition. It fires `'change'` handlers only, since
+    `'focus'`/`'blur'` are Android window-focus events rather than app-state transitions.
+  - `Platform` joined the reset registry, so `resetAllMocks()` restores `OS` and `Version`.
+
+  Every stateful mock registers its own reset hook as it loads, so resetting them does not
+  depend on a hand-maintained list that falls behind when a mock is added.
+
+  **One behaviour correction:** `Appearance.setColorScheme('auto')` (and its deprecated
+  spelling `'unspecified'`) now resolves to `'light'` instead of being stored and handed
+  back from `getColorScheme()`, which only ever returns `'light' | 'dark' | null` in React
+  Native. If you asserted the old pass-through, update to expect `'light'`.
+
+### Patch Changes
+
+- b2a34be: Load React Native modules written in Flow's modern `enum` / `component` / `hook` syntax.
+
+  `flow-remove-types` erases type annotations but passes those _declarations_ through
+  untouched, after which esbuild fails to parse them — so the modules could not be loaded at
+  all. The transform now falls back to React Native's own Babel preset, which lowers them,
+  on the original source rather than the stripped output.
+
+  The fallback is lazy and optional: it runs only for a file esbuild rejects, and it needs
+  `@babel/core` plus `@react-native/babel-preset` to resolve from your project — they ship
+  with every React Native app. Without them you get an error naming both, and only for the
+  affected modules; everything else keeps using the Babel-free path. Projects that never
+  touch these modules are unaffected.
+
+  In React Native 0.87 this fixes `experimental_LayoutConformance`, `VirtualViewMode` and
+  the four `unstable_Virtual*` exports, which previously threw on access.
+
+  The enum plugin is applied ahead of the preset deliberately: the preset merges
+  strip-types before its own enum handling, which deletes `export enum Foo {}` and leaves a
+  `ReferenceError` at runtime instead of a parse failure.
+
+  Also fixes `NativeComponentRegistry.get()` and `getWithFallback_DEPRECATED()`, which
+  called the `requireNativeComponent` mock's module namespace instead of its `.default` and
+  threw "requireNativeComponent is not a function". Nothing loaded that path until these
+  modules started compiling.
+
+  The transform cache directory is now keyed by the resolved `@babel/core` and preset
+  versions, so a toolchain upgrade cannot serve output built by the previous one. Existing
+  caches are invalidated once.
+
 ## 0.2.0
 
 ### Minor Changes
